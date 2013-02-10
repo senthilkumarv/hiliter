@@ -5,12 +5,14 @@ describe("Higlighter", function() {
 	    var strippedContent = stripHighlightsFromDocument(doc, "highlight");
 	    expect(strippedContent).toBe('<div>Hello dsfjdslkjflksdj sfkdsjlfsdj Highlight1 dsfkldskf. Some <span>more</span> text here. </div>');
 	});
+
 	it("should strip nested highlight tags", function() {
 	    var doc = '<div>Hello <span class="highlight">dsfjdslkjflksdj</span> <span class="highlight">sfkdsjlfsdj <span class="highlight">Highlight1</span></span> dsfkldskf. Some <span>more</span> text here. </div>';
 	    var strippedContent = stripHighlightsFromDocument(doc, "highlight");
 	    expect(strippedContent).toBe('<div>Hello dsfjdslkjflksdj sfkdsjlfsdj Highlight1 dsfkldskf. Some <span>more</span> text here. </div>');
 	});
     });
+
     describe("offset", function() {
 	it("should calculate text offset from given container", function() {
 	    var text = "<div>Hello dsfjdslkjflksdj <span data-identifier=\"start_12345678\">sfkdsjlfsdj</span> Highlight1 dsfkldskf. Some <span data-identifier=\"end_12345678\"><span>more</span></span> text here. </div>";
