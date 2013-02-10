@@ -15,10 +15,10 @@ describe("Higlighter", function() {
 
     describe("offset", function() {
 	it("should calculate text offset from given container", function() {
-	    var text = "<div>Hello dsfjdslkjflksdj <span data-identifier=\"start_12345678\">sfkdsjlfsdj</span> Highlight1 dsfkldskf. Some <span data-identifier=\"end_12345678\"><span>more</span></span> text here. </div>";
+	    var text = "<div>The <span data-identifier=\"start_12345678\">quick</span> brown fox <span>jumps <span data-identifier=\"end_12345678\">over</span> the lazy dog</span>. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.</div>";
 	    var offsets = offsetFromContainer(text, "12345678");
-	    expect(offsets.startOffset).toBe(22);
-	    expect(offsets.endOffset).toBe(61);
+	    expect(offsets.startOffset).toBe(5);
+	    expect(offsets.endOffset).toBe(31);
 	});
     });
     describe("add highlight", function() {

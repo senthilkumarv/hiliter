@@ -1,6 +1,6 @@
-var getNonHighlightAncestorContainer = function(range, ignoredClass) {
+var getNonHighlightAncestorContainer = function(range, highlightClass) {
 	var commonAncestor = range.commonAncestorContainer;
-	while(commonAncestor.nodeName === "#text" || commonAncestor.className === ignoredClass) {
+	while(commonAncestor.nodeName === "#text" || commonAncestor.className === highlightClass) {
 		commonAncestor = commonAncestor.parentElement;
 	}
 	return commonAncestor;
@@ -34,12 +34,12 @@ var stripHighlightsFromDocument = function(doc, highlightClass) {
 
 var calculateOffsetTill = function(container, endIndex) {
     var insideTag = false;
-    var index = 0;
+    var index = 1;
     for(var i=0; i<=endIndex; i++) {
 	if(container[i] === '<') {
 	        insideTag = true;
 	    }
-	index += (insideTag)?0:1;  
+	index += (insideTag) ? 0 : 1;  
 	if(container[i] === '>') {
 	        insideTag = false;
 	    }
@@ -50,7 +50,7 @@ var calculateOffsetTill = function(container, endIndex) {
 var offsetFromContainer = function(content, instance) {
     var startOffset = content.indexOf("<span data-identifier=\"start_" + instance + "\"")
     var endOffset = content.indexOf("<span data-identifier=\"end_" + instance + "\"")
-    
+    endOffset = content.indexOf("</span>", endOffset);
     return {
 	startOffset: calculateOffsetTill(content, startOffset),
 	endOffset: calculateOffsetTill(content, endOffset)
@@ -90,26 +90,59 @@ var addHighlight = function(content, highlight) {
     return htmlElement + content.substring(endOffset);
 };
 
-var handleSelection = function () {
+var getPathTo = function(element, root) {
+    if (element.id!=='')
+        return 'id("'+element.id+'")';
+    if (element===document.body)
+        return element.tagName;
+
+    var ix= 0;
+    var siblings= element.parentNode.childNodes;
+    for (var i= 0; i<siblings.length; i++) {
+        var sibling= siblings[i];
+        if (sibling===element)
+            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
+            ix++;
+    }
+}
+
+var highlight = function () {
     var range = window.getSelection().getRangeAt(0);
     var timeStamp = new Date().getTime();
-    wrapElementFromOffset(
-	{
-	    element: range.startContainer, 
-	    startOffset: range.startOffset, 
-	    endOffset: range.startContainer.length,
-	    wrapper: createWrapperWithIdentifier(timeStamp, "start")
-	});
-    wrapElementFromOffset(
-	{
-	    element: range.endContainer, 
-	    startOffset: 0, 
-	    endOffset: range.endOffset,
-	    wrapper: createWrapperWithIdentifier(timeStamp, "end")
-	});
+    if(range.startContainer != range.endContainer) {
+	wrapElementFromOffset(
+	    {
+		element: range.startContainer, 
+		startOffset: range.startOffset, 
+		endOffset: range.startContainer.length,
+		wrapper: createWrapperWithIdentifier(timeStamp, "start")
+	    });
+	wrapElementFromOffset(
+	    {
+		element: range.endContainer, 
+		startOffset: 0, 
+		endOffset: range.endOffset,
+		wrapper: createWrapperWithIdentifier(timeStamp, "end")
+	    });
+    }
+    else {
+	wrapElementFromOffset(
+	    {
+		element: range.startContainer, 
+		startOffset: range.startOffset, 
+		endOffset: range.startOffset,
+		wrapper: createWrapperWithIdentifier(timeStamp, "start")
+	    });
+	wrapElementFromOffset(
+	    {
+		element: range.endContainer, 
+		startOffset: range.endOffset, 
+		endOffset: range.endOffset,
+		wrapper: createWrapperWithIdentifier(timeStamp, "end")
+	    });	
+    }
     var commonAncestor = getNonHighlightAncestorContainer(range, 'highlighted');
-    offsetFromContainer({
-	container: commonAncestor,
-	elementIdentifier: timeStamp
-    });
+    var offset = offsetFromContainer(commonAncestor.innerHTML, timeStamp);
+    commonAncestor.innerHTML = addHighlight(commonAncestor.innerHTML, offset);
 };
