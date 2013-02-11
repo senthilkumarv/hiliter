@@ -90,59 +90,84 @@ var addHighlight = function(content, highlight) {
     return htmlElement + content.substring(endOffset);
 };
 
-var getPathTo = function(element, root) {
-    if (element.id!=='')
-        return 'id("'+element.id+'")';
-    if (element===document.body)
-        return element.tagName;
+var findNodePosition = function(data) {
+	var filter = function(node) {	    
+		if (node.className.search(data.highlightClass) === -1 && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
+		return NodeFilter.FILTER_SKIP;
+	};
+	var node, index = 0;
+	var nodes = document.createNodeIterator(data.content.querySelector(data.relativeTo), NodeFilter.SHOW_ELEMENT, filter, false);	
+	while((node = nodes.nextNode()) != null) {
+	    index ++;
+		if(node == data.nodeToFind) break;
+	}
+	return index;
+};
 
-    var ix= 0;
-    var siblings= element.parentNode.childNodes;
-    for (var i= 0; i<siblings.length; i++) {
-        var sibling= siblings[i];
-        if (sibling===element)
-            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
-        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
-            ix++;
-    }
-}
+var findNodeByPosition = function(data){
+	var filter = function(node) {	    
+		if (node.className.search(data.highlightClass) === -1 && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
+		return NodeFilter.FILTER_SKIP;
+	};
+	var index = 0;
+	var nodes = document.createNodeIterator(data.content.querySelector(data.relativeTo), NodeFilter.SHOW_ELEMENT, filter, false);
+	while((node = nodes.nextNode())!= null){
+		index++;
+		if(index == data.nodePosition)
+		return node;
+	}		
+};
 
-var highlight = function () {
-    var range = window.getSelection().getRangeAt(0);
-    var timeStamp = new Date().getTime();
-    if(range.startContainer != range.endContainer) {
-	wrapElementFromOffset(
-	    {
+var wrapSelectionWithSameParent = function(range, instanceId) {
+	wrapElementFromOffset({
 		element: range.startContainer, 
 		startOffset: range.startOffset, 
 		endOffset: range.startContainer.length,
-		wrapper: createWrapperWithIdentifier(timeStamp, "start")
-	    });
-	wrapElementFromOffset(
-	    {
+		wrapper: createWrapperWithIdentifier(instanceId, "start")
+	});
+	wrapElementFromOffset({
 		element: range.endContainer, 
 		startOffset: 0, 
 		endOffset: range.endOffset,
-		wrapper: createWrapperWithIdentifier(timeStamp, "end")
-	    });
-    }
-    else {
-	wrapElementFromOffset(
-	    {
+		wrapper: createWrapperWithIdentifier(instanceId, "end")
+	});	
+};
+
+var wrapSelectionWithDifferentParents = function(range, instanceId) {
+	wrapElementFromOffset({
 		element: range.startContainer, 
 		startOffset: range.startOffset, 
 		endOffset: range.startOffset,
 		wrapper: createWrapperWithIdentifier(timeStamp, "start")
-	    });
-	wrapElementFromOffset(
-	    {
+	});
+	wrapElementFromOffset({
 		element: range.endContainer, 
 		startOffset: range.endOffset, 
 		endOffset: range.endOffset,
 		wrapper: createWrapperWithIdentifier(timeStamp, "end")
-	    });	
-    }
+	});		
+};
+
+var isSelectionWithinSameParent = function(range) {
+	return range.startContainer != range.endContainer;
+};
+
+var highlight = function () {
+    var range = window.getSelection().getRangeAt(0);
+    var timeStamp = new Date().getTime();
+	isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, timeStamp) : wrapSelectionWithDifferentParents(range, timeStamp);		
     var commonAncestor = getNonHighlightAncestorContainer(range, 'highlighted');
     var offset = offsetFromContainer(commonAncestor.innerHTML, timeStamp);
     commonAncestor.innerHTML = addHighlight(commonAncestor.innerHTML, offset);
+	var highlightData = {
+		commonAncestorPosition: findNodePosition({
+			nodeToFind: commonAncestor,
+			content: document,
+			relativeTo: "#content",
+			highlightClass: "highlighted"}),
+		startOffset: offset.startOffset,
+		endOffset: offset.endOffset
+	};
+	console.log(highlightData);
+	return highlightData;
 };
