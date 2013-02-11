@@ -23,19 +23,19 @@ describe("Higlighter", function() {
     });
     describe("add highlight", function() {
 	it("should transform text offset to document offset", function() {
-	    var doc = '<div>Hello World sfkdsjlfsdj Highlight1 dsfkldskf. Some more text here.</div>';
+	    var doc = '<div>Hello World.</div>';
 	    var documentOffset = convertTextOffsetToDocumentOffset(doc, 6);	    
 	    expect(documentOffset).toBe(11);
 	});
 
 	it("should add the highlight tag for the give text range", function() {
-	    var doc = '<div>Hello dsfjdslkjflksdj sfkdsjlfsdj Highlight1 dsfkldskf. Some more text here.</div>';
+	    var doc = '<div>Hello World. Some more text here.</div>';
 	    var highlightedContent = addHighlight(doc, {
 		startOffset: 7,
 		endOffset: 12,
 		highlightClass: 'highlight',
 	    });
-	    expect(highlightedContent).toBe('<div>Hello <span class=\"highlight\">dsfjds</span>lkjflksdj sfkdsjlfsdj Highlight1 dsfkldskf. Some more text here.</div>');
+	    expect(highlightedContent).toBe('<div>Hello <span class=\"highlight\">World.</span> Some more text here.</div>');
 	});
 	
 	it("should add highlight for nested tags", function(){

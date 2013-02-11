@@ -24,10 +24,10 @@ var stripHighlightsFromDocument = function(doc, highlightClass) {
     var regex = new RegExp("(<span[^>]+class\\s*=\\s*(\"|')" + highlightClass + "\\2[^>]*>)(.*?)(</span>)",'g');
     var strippedContent = doc;
     while(true) {
-	var temp = strippedContent.replace(regex, "$3");
-	if(strippedContent === temp) 
-	    break;
-	strippedContent = temp;
+		var temp = strippedContent.replace(regex, "$3");
+		if(strippedContent === temp) 
+		    break;
+		strippedContent = temp;
     }
     return strippedContent;
 };
