@@ -1,4 +1,4 @@
 var handleSelection = function () {
-    var highlightData = highlight('highlight');
+    var highlightData = Hiliter.highlight('#content', 'highlight');
     
 };
