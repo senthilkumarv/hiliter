@@ -184,3 +184,15 @@ var highlight = function () {
 	commonAncestor.innerHTML = addHighlight(commonAncestor, "#content", highlightData);
 	return highlightData;
 };
+
+var loadHighlights = function(highlights) {
+	for(i = 0;i<highlights.length;i++) {
+		var commonAncestor = findNodeByPosition({
+												nodePosition: highlights[i].commonAncestorPosition,
+												content: document.body,
+												relativeTo: "#content",
+												highlightClass: 'highlighted'
+											  });
+		addHighlight(commonAncestor, "#content", highlights[i]);
+	}
+};
