@@ -1,12 +1,8 @@
 describe("Higlighter", function() {
-	var hiliter;
-	beforeEach(function() {
-		hiliter = new Hiliter();
-	});
     describe("offset", function() {
 	it("should calculate text offset from given container", function() {
 	    var text = "<div>The <span data-identifier=\"start_12345678\">quick</span> brown fox <span>jumps <span data-identifier=\"end_12345678\">over</span> the lazy dog</span>. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.</div>";
-	    var offsets = hiliter.offsetFromContainer(text, "12345678");
+	    var offsets = Hiliter.offsetFromContainer(text, "12345678");
 	    expect(offsets.startOffset).toBe(5);
 	    expect(offsets.endOffset).toBe(31);
 	});
@@ -14,7 +10,7 @@ describe("Higlighter", function() {
     describe("add highlight", function() {
 		it("should transform text offset to document offset", function() {
 		    var doc = '<div>Hello World.</div>';
-		    var documentOffset = hiliter.convertTextOffsetToDocumentOffset(doc, 6);	    
+		    var documentOffset = Hiliter.convertTextOffsetToDocumentOffset(doc, 6);	    
 		    expect(documentOffset).toBe(11);
 		});
 
@@ -42,7 +38,7 @@ describe("Higlighter", function() {
 		it("should find the position relative to give root" , function() {
 			var doc = $("<div><div id=\"root\"><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
 			var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
-			var nodePosition = hiliter.findNodePosition({
+			var nodePosition = Hiliter.findNodePosition({
 				nodeToFind: nodeToFind,
 				content: doc,
 				relativeTo: "#root",
@@ -53,7 +49,7 @@ describe("Higlighter", function() {
 		it("should skip the highlight element" , function() {
 			var doc = $("<div><div id=\"root\"><div>Lorem <span class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
 			var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
-			var nodePosition = hiliter.findNodePosition({
+			var nodePosition = Hiliter.findNodePosition({
 				nodeToFind: nodeToFind,
 				content: doc,
 				relativeTo: "#root",
@@ -67,7 +63,7 @@ describe("Higlighter", function() {
 			var doc = $("<div><div id=\"root\"><div>Lorem <span class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
 			var nodePosition = 4;
 			var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
-			var node = hiliter.findNodeByPosition({
+			var node = Hiliter.findNodeByPosition({
 				nodePosition: nodePosition,
 				content: doc,
 				relativeTo: "#root",
