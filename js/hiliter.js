@@ -65,7 +65,7 @@ var highlightTagWithClass = function(className) {
 	return "<span class=\"" + className + "\">";
 };
 
-var addHighlight = function(content, relativeTo, highlight) {
+var addHighlight = function(content, highlight) {
     var nodeContent = content.innerHTML;
     var startOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
     var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset);
@@ -150,7 +150,6 @@ var highlight = function (containerSelector, className) {
 	isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, timeStamp) : wrapSelectionWithDifferentParents(range, timeStamp);		
     var commonAncestor = getNonHighlightAncestorContainer(range, className);
     var offset = offsetFromContainer(commonAncestor.innerHTML, timeStamp);
-
 	var highlightData = {
 		commonAncestorPosition: findNodePosition({
 			nodeToFind: commonAncestor,
@@ -161,19 +160,19 @@ var highlight = function (containerSelector, className) {
 		endOffset: offset.endOffset,
 		highlightClass: className
 	};
-	addHighlight(commonAncestor, containerSelector, highlightData);
+	addHighlight(commonAncestor, highlightData);
 	return highlightData;
 };
 
-var loadHighlights = function(containerSelector, className, highlights) {
+var loadHighlights = function(containerSelector, highlights) {
 	for(i = 0;i<highlights.length;i++) {
 		var commonAncestor = findNodeByPosition({
 												nodePosition: highlights[i].commonAncestorPosition,
 												content: document.body,
 												relativeTo: containerSelector,
-												highlightClass: className
+												highlightClass: highlights[i].highlightClass
 											  });
-		addHighlight(commonAncestor, containerSelector, highlights[i]);
+		addHighlight(commonAncestor, highlights[i]);
 	}
 };
 	return {
