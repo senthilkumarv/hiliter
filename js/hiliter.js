@@ -66,28 +66,19 @@ var highlightTagWithClass = function(className) {
 };
 
 var addHighlight = function(content, relativeTo, highlight) {
-    var insideTag = false;
-	var startNode = findNodeByPosition({
-										nodePosition: highlight.commonAncestorPosition,
-										content: content,
-										relativeTo: relativeTo,
-										highlightClass: highlight.highlightClass
-									  });
-									  console.log(startNode);
-	var nodeContent = startNode.innerHTML;
+    var nodeContent = content.innerHTML;
     var startOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
     var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset);
     var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithClass(highlight.highlightClass);
     for(var i = startOffset - 1; i < endOffset; i++) {
-	htmlElement += nodeContent[i];
-	if(nodeContent[i] === '<')
-	    htmlElement += "/span><";
-	if(nodeContent[i] === '>')
-	    htmlElement += highlightTagWithClass(highlight.highlightClass);
+	    htmlElement += nodeContent[i];
+	    if(nodeContent[i] === '<')
+	        htmlElement += "/span><";
+	    if(nodeContent[i] === '>')
+	        htmlElement += highlightTagWithClass(highlight.highlightClass);
     }
     htmlElement += "</span>";
-	startNode.innerHTML = htmlElement + nodeContent.substring(endOffset);
-    return content.innerHTML;
+    content.innerHTML = htmlElement + nodeContent.substring(endOffset);
 };
 
 var findNodePosition = function(data) {
@@ -170,7 +161,7 @@ var highlight = function (containerSelector, className) {
 		endOffset: offset.endOffset,
 		highlightClass: className
 	};
-	commonAncestor.innerHTML = addHighlight(commonAncestor, containerSelector, highlightData);
+	addHighlight(commonAncestor, containerSelector, highlightData);
 	return highlightData;
 };
 
