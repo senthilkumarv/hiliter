@@ -1,3 +1,4 @@
+var Hiliter = function () {
 var getNonHighlightAncestorContainer = function(range, highlightClass) {
 	var commonAncestor = range.commonAncestorContainer;
 	while(commonAncestor.nodeName === "#text" || commonAncestor.className === highlightClass) {
@@ -18,18 +19,6 @@ var wrapElementFromOffset = function(data) {
     newRange.setStart(data.element, data.startOffset);
     newRange.setEnd(data.element, data.endOffset);
     newRange.surroundContents(data.wrapper);
-};
-
-var stripHighlightsFromDocument = function(doc, highlightClass) {
-    var regex = new RegExp("(<span[^>]+class\\s*=\\s*(\"|')" + highlightClass + "\\2[^>]*>)(.*?)(</span>)",'g');
-    var strippedContent = doc;
-    while(true) {
-		var temp = strippedContent.replace(regex, "$3");
-		if(strippedContent === temp) 
-		    break;
-		strippedContent = temp;
-    }
-    return strippedContent;
 };
 
 var calculateOffsetTill = function(container, endIndex) {
@@ -195,4 +184,14 @@ var loadHighlights = function(highlights) {
 											  });
 		addHighlight(commonAncestor, "#content", highlights[i]);
 	}
+};
+	return {
+		loadHighlights: loadHighlights,
+		highlight: highlight,
+		findNodeByPosition: findNodeByPosition,
+		findNodePosition: findNodePosition,
+		addHighlight: addHighlight,
+		offsetFromContainer: offsetFromContainer,
+		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset		
+	};
 };
