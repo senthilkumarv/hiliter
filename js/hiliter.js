@@ -1,4 +1,4 @@
-var Hiliter = function () {
+var Hiliter = (function () {
 var getNonHighlightAncestorContainer = function(range, highlightClass) {
 	var commonAncestor = range.commonAncestorContainer;
 	while(commonAncestor.nodeName === "#text" || commonAncestor.className === highlightClass) {
@@ -153,36 +153,36 @@ var isSelectionWithinSameParent = function(range) {
 	return range.startContainer == range.endContainer;
 };
 
-var highlight = function () {
+var highlight = function (containerSelector, className) {
     var range = window.getSelection().getRangeAt(0);
     var timeStamp = new Date().getTime();
 	isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, timeStamp) : wrapSelectionWithDifferentParents(range, timeStamp);		
-    var commonAncestor = getNonHighlightAncestorContainer(range, 'highlighted');
+    var commonAncestor = getNonHighlightAncestorContainer(range, className);
     var offset = offsetFromContainer(commonAncestor.innerHTML, timeStamp);
 
 	var highlightData = {
 		commonAncestorPosition: findNodePosition({
 			nodeToFind: commonAncestor,
 			content: document,
-			relativeTo: "#content",
-			highlightClass: "highlighted"}),
+			relativeTo: containerSelector,
+			highlightClass: className}),
 		startOffset: offset.startOffset,
 		endOffset: offset.endOffset,
-		highlightClass: 'highlighted'
+		highlightClass: className
 	};
-	commonAncestor.innerHTML = addHighlight(commonAncestor, "#content", highlightData);
+	commonAncestor.innerHTML = addHighlight(commonAncestor, containerSelector, highlightData);
 	return highlightData;
 };
 
-var loadHighlights = function(highlights) {
+var loadHighlights = function(containerSelector, className, highlights) {
 	for(i = 0;i<highlights.length;i++) {
 		var commonAncestor = findNodeByPosition({
 												nodePosition: highlights[i].commonAncestorPosition,
 												content: document.body,
-												relativeTo: "#content",
-												highlightClass: 'highlighted'
+												relativeTo: containerSelector,
+												highlightClass: className
 											  });
-		addHighlight(commonAncestor, "#content", highlights[i]);
+		addHighlight(commonAncestor, containerSelector, highlights[i]);
 	}
 };
 	return {
@@ -194,4 +194,4 @@ var loadHighlights = function(highlights) {
 		offsetFromContainer: offsetFromContainer,
 		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset		
 	};
-};
+})();
