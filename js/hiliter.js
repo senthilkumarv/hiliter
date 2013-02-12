@@ -10,7 +10,6 @@ var getNonHighlightAncestorContainer = function(range, highlightClass) {
 var createWrapperWithIdentifier = function(identifier, type) {
     var element = document.createElement('span');
     element.setAttribute('data-identifier', type + "_" + identifier);
-    element.setAttribute('style', 'background-color: blue;');
     return element;
 };
 
