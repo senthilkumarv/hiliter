@@ -21,7 +21,7 @@ describe("Higlighter", function() {
 				endOffset: 12,
 				highlightClass: 'highlight'
 		    });
-		    expect(doc.innerHTML).toBe('Hello <span class=\"highlight\">World.</span> Some more text here.');
+		    expect(doc.innerHTML).toBe('Hello <span class=\"highlight\">World</span>. Some more text here.');
 		});
 	
 		it("should add highlight for nested tags", function(){
@@ -31,7 +31,7 @@ describe("Higlighter", function() {
 			   endOffset: 23,
 			   highlightClass: 'highlight'
 		   });
-		   expect(doc.innerHTML).toBe("<div>L<span class=\"highlight\">orem ipsum dolor</span></div><span class=\"highlight\"> sit </span><div><span class=\"highlight\">a</span>met, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
+		   expect(doc.innerHTML).toBe("<div>L<span class=\"highlight\">orem ipsum dolor</span></div><span class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
 		});
 	});
 	describe("find node position from root", function() {

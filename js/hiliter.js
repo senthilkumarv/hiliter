@@ -68,7 +68,7 @@ var highlightTagWithClass = function(className) {
 var addHighlight = function(content, highlight) {
     var nodeContent = content.innerHTML;
     var startOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
-    var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset);
+    var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
     var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithClass(highlight.highlightClass);
     for(var i = startOffset - 1; i < endOffset; i++) {
 	    htmlElement += nodeContent[i];
@@ -165,7 +165,7 @@ var highlight = function (containerSelector, className) {
 };
 
 var loadHighlights = function(containerSelector, highlights) {
-	for(i = 0;i<highlights.length;i++) {
+	for(var i = 0;i<highlights.length;i++) {
 		var commonAncestor = findNodeByPosition({
 												nodePosition: highlights[i].commonAncestorPosition,
 												content: document.body,
