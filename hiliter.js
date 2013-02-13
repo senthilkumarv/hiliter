@@ -181,6 +181,7 @@ var Hiliter = (function() {
 			addHighlight(commonAncestor, highlights[i]);
 		}
 	};
+
 	return {
 		loadHighlights: loadHighlights,
 		highlight: highlight,
@@ -189,6 +190,8 @@ var Hiliter = (function() {
 		addHighlight: addHighlight,
 		offsetFromContainer: offsetFromContainer,
 		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset,
-		sanitize: sanitize
+		sanitize: sanitize,
+		isSelectionWithinSameParent: isSelectionWithinSameParent,
+		highlightTagWithId: highlightTagWithId,
 	};
 })();

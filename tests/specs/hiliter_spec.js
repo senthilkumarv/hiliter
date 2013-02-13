@@ -65,6 +65,12 @@ describe("Highlighter", function() {
 				.to.equal("<div>L<span data-highlight-id=\"1\" class=\"highlight\">orem ipsum dolor</span></div><span data-highlight-id=\"1\" class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
 			done();
 		});
+		it("should create highlight tag given id and class name", function(done) {
+			var result = Hiliter.highlightTagWithId(1, "someClass");
+			expect(result).
+				to.equal("<span data-highlight-id=\"1\" class=\"someClass\">");
+			done();
+		});
 	});
 	describe("Find node position from root", function() {
 		it("should find the position relative to give root", function(done) {
@@ -106,5 +112,21 @@ describe("Highlighter", function() {
 				.to.equal(nodeToFind);
 			done();
 		});
+	});
+	describe("Range", function() {
+		it("should give selection is within same parent when start container and end container are same", function(done) {
+			var range = {startContainer: 1, endContainer: 1};
+			var result = Hiliter.isSelectionWithinSameParent(range);
+			expect(result)
+				.to.equal(true);
+			done();
+		});
+		it("should give selection is within same parent when start container and end container are same", function(done) {
+			var range = {startContainer: 1, endContainer: 2};
+			var result = Hiliter.isSelectionWithinSameParent(range);
+			expect(result)
+				.to.equal(false);
+			done();
+		});		
 	});
 });
