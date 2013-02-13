@@ -10,9 +10,9 @@ describe("Highlighter", function() {
     });
 	describe("Add Highlight", function() {
 	    it("should remove highlight tags with no text in them", function(done) {
-			var doc = "<div>The quick brown fox <span class=\"highlight\" data-id=\"1\"></span><span data-id=\"2\" class=\"highlight\"></span><span class=\"highlight\">jumps over the lazy</span> dog.</div>";
-			var sanitized_markups = Hiliter.sanitize(doc, "highlight");
-	        expect(sanitized_markups).to.equal("<div>The quick brown fox <span class=\"highlight\">jumps over the lazy</span> dog.</div>");
+			var doc = "<div>The quick brown fox <span class=\"highlight\" data-highlight-id=\"1\"></span><span data-highlight-id=\"1\" class=\"highlight\"></span><span data-highlight-id=\"1\" class=\"highlight\">jumps over the lazy</span> dog.</div>";
+			var sanitized_markups = Hiliter.sanitize(doc, "1");
+	        expect(sanitized_markups).to.equal("<div>The quick brown fox <span data-highlight-id=\"1\" class=\"highlight\">jumps over the lazy</span> dog.</div>");
 	        done();
 	    });		
 		
@@ -26,33 +26,36 @@ describe("Highlighter", function() {
 		it("should add the highlight tag for the give text range", function(done) {
 		    var doc = $("<div>Hello World. Some more text here.</div>")[0];
 		    Hiliter.addHighlight(doc, {
+				id: 1,
 				startOffset: 7,
 				endOffset: 12,
 				highlightClass: 'highlight'
 		    });
-		    expect(doc.innerHTML).to.equal('Hello <span class=\"highlight\">World</span>. Some more text here.');
+		    expect(doc.innerHTML).to.equal('Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>. Some more text here.');
 			done();
 		});
 
 		it("should not add empty highlight spans for nested tags", function(done){
 		   var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
 		   Hiliter.addHighlight(doc, {
+			   id: 1,
 			   startOffset: 2,
 			   endOffset: 23,
 			   highlightClass: 'highlight'
 		   });
-		   expect(doc.innerHTML).to.equal("<div>L<span class=\"highlight\">orem ipsum dolor</span><br></div><span class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
+		   expect(doc.innerHTML).to.equal("<div>L<span data-highlight-id=\"1\" class=\"highlight\">orem ipsum dolor</span><br></div><span data-highlight-id=\"1\" class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
 		   done();
 		});				
 		
 		it("should add highlight for nested tags", function(done){
 		   var doc = $("<div><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
 		   Hiliter.addHighlight(doc, {
+			   id: 1,
 			   startOffset: 2,
 			   endOffset: 23,
 			   highlightClass: 'highlight'
 		   });
-		   expect(doc.innerHTML).to.equal("<div>L<span class=\"highlight\">orem ipsum dolor</span></div><span class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
+		   expect(doc.innerHTML).to.equal("<div>L<span data-highlight-id=\"1\" class=\"highlight\">orem ipsum dolor</span></div><span data-highlight-id=\"1\" class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
 		   done();
 		});		
 	});
@@ -64,19 +67,17 @@ describe("Highlighter", function() {
 				nodeToFind: nodeToFind,
 				content: doc,
 				relativeTo: "#root",
-				highlightClass: "highlight"
 			});			
 			expect(nodePosition).to.equal(3);
 			done();
 		});
 		it("should skip the highlight element" , function(done) {
-			var doc = $("<div><div id=\"root\"><div>Lorem <span class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+			var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
 			var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
 			var nodePosition = Hiliter.findNodePosition({
 				nodeToFind: nodeToFind,
 				content: doc,
 				relativeTo: "#root",
-				highlightClass: "highlight"
 			});			
 			expect(nodePosition).to.equal(3);
 			done();
@@ -84,14 +85,13 @@ describe("Highlighter", function() {
 	});
 	describe("Find node position", function() {
 		it("should give the node given the node position" , function(done) {
-			var doc = $("<div><div id=\"root\"><div>Lorem <span class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+			var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
 			var nodePosition = 4;
 			var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
 			var node = Hiliter.findNodeByPosition({
 				nodePosition: nodePosition,
 				content: doc,
 				relativeTo: "#root",
-				highlightClass: "highlight"
 			});	
 			expect(node).to.equal(nodeToFind);	
 			done();

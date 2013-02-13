@@ -1,7 +1,7 @@
 var Hiliter = (function () {
-var getNonHighlightAncestorContainer = function(range, highlightClass) {
+var getNonHighlightAncestorContainer = function(range) {
 	var commonAncestor = range.commonAncestorContainer;
-	while(commonAncestor.nodeName === "#text" || commonAncestor.className === highlightClass) {
+	while(commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
 		commonAncestor = commonAncestor.parentElement;
 	}
 	return commonAncestor;
@@ -60,34 +60,34 @@ var convertTextOffsetToDocumentOffset = function(content, offset) {
     return i;
 };
 
-var sanitize = function(content, className) {
-	var regex = new RegExp("(<span[^>]+class\\s*=\\s*(\"|')" + className + "\\2[^>]*>)(\\s*)(</span>)",'g');
+var sanitize = function(content, id) {
+	var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + id + "\\2[^>]*>)(\\s*)(</span>)",'g');
 	return content.replace(regex, '');
 };
 
-var highlightTagWithClass = function(className) {
-	return "<span class=\"" + className + "\">";
+var highlightTagWithId = function(id, className) {
+	return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
 };
 
 var addHighlight = function(content, highlight) {
     var nodeContent = content.innerHTML;
     var startOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
     var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
-    var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithClass(highlight.highlightClass);
+    var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.id, highlight.highlightClass);
     for(var i = startOffset - 1; i < endOffset; i++) {
 	    htmlElement += nodeContent[i];
 	    if(nodeContent[i] === '<')
 	        htmlElement += "/span><";
 	    if(nodeContent[i] === '>')
-	        htmlElement += highlightTagWithClass(highlight.highlightClass);
+	        htmlElement += highlightTagWithId(highlight.id, highlight.highlightClass);
     }
     htmlElement += "</span>";
-    content.innerHTML = sanitize(htmlElement, highlight.highlightClass) + nodeContent.substring(endOffset);
+    content.innerHTML = sanitize(htmlElement, highlight.id) + nodeContent.substring(endOffset);
 };
 
 var findNodePosition = function(data) {
 	var filter = function(node) {	    
-		if (node.className.search(data.highlightClass) === -1 && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
+		if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
 		return NodeFilter.FILTER_SKIP;
 	};
 	var node, index = 0;
@@ -101,7 +101,7 @@ var findNodePosition = function(data) {
 
 var findNodeByPosition = function(data){
 	var filter = function(node) {	    
-		if (node.className.search(data.highlightClass) === -1 && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
+		if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
 		return NodeFilter.FILTER_SKIP;
 	};
 	var index = 0;
@@ -148,13 +148,14 @@ var isSelectionWithinSameParent = function(range) {
 	return range.startContainer == range.endContainer;
 };
 
-var highlight = function (containerSelector, className) {
+var highlight = function (containerSelector, className, highlightId) {
     var range = window.getSelection().getRangeAt(0);
-    var timeStamp = new Date().getTime();
-	isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, timeStamp) : wrapSelectionWithDifferentParents(range, timeStamp);		
-    var commonAncestor = getNonHighlightAncestorContainer(range, className);
-    var offset = offsetFromContainer(commonAncestor.innerHTML, timeStamp);
+    var highlightId = (highlightId) ? highlightId : (new Date().getTime());
+	isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);		
+    var commonAncestor = getNonHighlightAncestorContainer(range);
+    var offset = offsetFromContainer(commonAncestor.innerHTML, highlightId);
 	var highlightData = {
+		id: highlightId,
 		commonAncestorPosition: findNodePosition({
 			nodeToFind: commonAncestor,
 			content: document,
