@@ -60,6 +60,12 @@ var convertTextOffsetToDocumentOffset = function(content, offset) {
     return i;
 };
 
+var sanitize = function(content, className) {
+	var regex = new RegExp("(<span[^>]+class\\s*=\\s*(\"|')" + className + "\\2[^>]*>)(\\s*)(</span>)",'g');
+	//var regexp = new RegExp("<span class=\"" + className + "\"\\s*>\\s*</span>", 'g');
+	return content.replace(regex, '');
+};
+
 var highlightTagWithClass = function(className) {
 	return "<span class=\"" + className + "\">";
 };
@@ -181,6 +187,7 @@ var loadHighlights = function(containerSelector, highlights) {
 		findNodePosition: findNodePosition,
 		addHighlight: addHighlight,
 		offsetFromContainer: offsetFromContainer,
-		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset		
+		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset,
+		sanitize: sanitize
 	};
 })();
