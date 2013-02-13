@@ -33,7 +33,18 @@ describe("Highlighter", function() {
 		    expect(doc.innerHTML).to.equal('Hello <span class=\"highlight\">World</span>. Some more text here.');
 			done();
 		});
-	
+
+		it("should not add empty highlight spans for nested tags", function(done){
+		   var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
+		   Hiliter.addHighlight(doc, {
+			   startOffset: 2,
+			   endOffset: 23,
+			   highlightClass: 'highlight'
+		   });
+		   expect(doc.innerHTML).to.equal("<div>L<span class=\"highlight\">orem ipsum dolor</span><br></div><span class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
+		   done();
+		});				
+		
 		it("should add highlight for nested tags", function(done){
 		   var doc = $("<div><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
 		   Hiliter.addHighlight(doc, {

@@ -62,7 +62,6 @@ var convertTextOffsetToDocumentOffset = function(content, offset) {
 
 var sanitize = function(content, className) {
 	var regex = new RegExp("(<span[^>]+class\\s*=\\s*(\"|')" + className + "\\2[^>]*>)(\\s*)(</span>)",'g');
-	//var regexp = new RegExp("<span class=\"" + className + "\"\\s*>\\s*</span>", 'g');
 	return content.replace(regex, '');
 };
 
@@ -83,7 +82,7 @@ var addHighlight = function(content, highlight) {
 	        htmlElement += highlightTagWithClass(highlight.highlightClass);
     }
     htmlElement += "</span>";
-    content.innerHTML = htmlElement + nodeContent.substring(endOffset);
+    content.innerHTML = sanitize(htmlElement, highlight.highlightClass) + nodeContent.substring(endOffset);
 };
 
 var findNodePosition = function(data) {
