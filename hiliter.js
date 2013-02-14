@@ -125,7 +125,7 @@ var Finder = (function() {
 	};
 })();
 
-var Hiliter = (function(rangey, marker, nodeFinder) {
+var HiliterCls = function(rangey, marker, nodeFinder) {
 
 	var highlightTagWithId = function(id, className) {
 		return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
@@ -196,7 +196,6 @@ var Hiliter = (function(rangey, marker, nodeFinder) {
 			highlightClass: className
 		};
 		addHighlight(commonAncestor, highlightData);
-		console.log(highlightData);
 		return highlightData;
 	};
 
@@ -220,6 +219,8 @@ var Hiliter = (function(rangey, marker, nodeFinder) {
 		removeHighlight: removeHighlight,
 		getSelectedHighlight: getSelectedHighlight
 	};
-})(Rangey, Marker, Finder);
+};
+
+var Hiliter = new HiliterCls(Rangey, Marker, Finder);
 
 
