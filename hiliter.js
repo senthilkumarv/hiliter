@@ -40,20 +40,18 @@ var Rangey = (function() {
 		return i;
 	};
 	
-	return {
-		offsetFromContainer: offsetFromContainer,
-		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset				
-	};	
-})();
-var Hiliter = (function(rangey) {
-	var getNonHighlightAncestorContainer = function(range) {
-		var commonAncestor = range.commonAncestorContainer;
-		while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
-			commonAncestor = commonAncestor.parentElement;
-		}
-		return commonAncestor;
+	var isSelectionWithinSameParent = function(range) {
+		return range.startContainer == range.endContainer;
 	};
 
+	return {
+		offsetFromContainer: offsetFromContainer,
+		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset,
+		isSelectionWithinSameParent: isSelectionWithinSameParent
+	};	
+})();
+
+var Helper = (function() {
 	var createWrapperWithIdentifier = function(identifier, type) {
 		var element = document.createElement('span');
 		element.setAttribute('data-identifier', type + "_" + identifier);
@@ -71,6 +69,22 @@ var Hiliter = (function(rangey) {
 	var sanitize = function(content, identifier) {
 		var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(\\s*)(</span>)", 'g');
 		return content.replace(regex, '');
+	};	
+	
+	return {
+		createWrapperWithIdentifier: createWrapperWithIdentifier,
+		wrapElementFromOffset: wrapElementFromOffset,
+		sanitize: sanitize
+	};
+})();
+
+var Hiliter = (function(rangey, helper) {
+	var getNonHighlightAncestorContainer = function(range) {
+		var commonAncestor = range.commonAncestorContainer;
+		while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
+			commonAncestor = commonAncestor.parentElement;
+		}
+		return commonAncestor;
 	};
 
 	var highlightTagWithId = function(id, className) {
@@ -88,7 +102,7 @@ var Hiliter = (function(rangey) {
 			if (nodeContent[i] === '>') htmlElement += highlightTagWithId(highlight.guid, highlight.highlightClass);
 		}
 		htmlElement += "</span>";
-		content.innerHTML = sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
+		content.innerHTML = helper.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
 	};
 
 	var findNodePosition = function(data) {
@@ -120,37 +134,33 @@ var Hiliter = (function(rangey) {
 	};
 
 	var wrapSelectionWithDifferentParents = function(range, identifier) {
-		wrapElementFromOffset({
+		helper.wrapElementFromOffset({
 			element: range.startContainer,
 			startOffset: range.startOffset,
 			endOffset: range.startContainer.length,
-			wrapper: createWrapperWithIdentifier(identifier, "start")
+			wrapper: helper.createWrapperWithIdentifier(identifier, "start")
 		});
-		wrapElementFromOffset({
+		helper.wrapElementFromOffset({
 			element: range.endContainer,
 			startOffset: 0,
 			endOffset: range.endOffset,
-			wrapper: createWrapperWithIdentifier(identifier, "end")
+			wrapper: helper.createWrapperWithIdentifier(identifier, "end")
 		});
 	};
 
 	var wrapSelectionWithSameParent = function(range, identifier) {
-		wrapElementFromOffset({
+		helper.wrapElementFromOffset({
 			element: range.startContainer,
 			startOffset: range.startOffset,
 			endOffset: range.startOffset,
-			wrapper: createWrapperWithIdentifier(identifier, "start")
+			wrapper: helpers.createWrapperWithIdentifier(identifier, "start")
 		});
-		wrapElementFromOffset({
+		helper.wrapElementFromOffset({
 			element: range.endContainer,
 			startOffset: range.endOffset,
 			endOffset: range.endOffset,
-			wrapper: createWrapperWithIdentifier(identifier, "end")
+			wrapper: helpers.createWrapperWithIdentifier(identifier, "end")
 		});
-	};
-
-	var isSelectionWithinSameParent = function(range) {
-		return range.startContainer == range.endContainer;
 	};
 
 	var removeHighlight = function(content, identifier) {
@@ -178,7 +188,7 @@ var Hiliter = (function(rangey) {
 			.getRangeAt(0);
 		var highlightId = (highlightId) ? highlightId : (new Date()
 			.getTime());
-		isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);
+		rangey.isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);
 		var commonAncestor = getNonHighlightAncestorContainer(range);
 		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		var highlightData = {
@@ -194,6 +204,7 @@ var Hiliter = (function(rangey) {
 			highlightClass: className
 		};
 		addHighlight(commonAncestor, highlightData);
+		console.log(highlightData);
 		return highlightData;
 	};
 
@@ -215,12 +226,10 @@ var Hiliter = (function(rangey) {
 		findNodeByPosition: findNodeByPosition,
 		findNodePosition: findNodePosition,
 		addHighlight: addHighlight,
-		sanitize: sanitize,
-		isSelectionWithinSameParent: isSelectionWithinSameParent,
 		highlightTagWithId: highlightTagWithId,
 		removeHighlight: removeHighlight,
 		getSelectedHighlight: getSelectedHighlight
 	};
-})(Rangey);
+})(Rangey, Helper);
 
 

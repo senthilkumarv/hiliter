@@ -13,7 +13,7 @@ describe("Highlighter", function() {
 	describe("Add Highlight", function() {
 		it("should remove highlight tags with no text in them", function(done) {
 			var doc = "<div>The quick brown fox <span class=\"highlight\" data-highlight-id=\"1\"></span><span data-highlight-id=\"1\" class=\"highlight\"></span><span data-highlight-id=\"1\" class=\"highlight\">jumps over the lazy</span> dog.</div>";
-			var sanitized_markups = Hiliter.sanitize(doc, "1");
+			var sanitized_markups = Helper.sanitize(doc, "1");
 			expect(sanitized_markups)
 				.to.equal("<div>The quick brown fox <span data-highlight-id=\"1\" class=\"highlight\">jumps over the lazy</span> dog.</div>");
 			done();
@@ -139,14 +139,14 @@ describe("Highlighter", function() {
 	describe("Range", function() {
 		it("should give selection is within same parent when start container and end container are same", function(done) {
 			var range = {startContainer: 1, endContainer: 1};
-			var result = Hiliter.isSelectionWithinSameParent(range);
+			var result = Rangey.isSelectionWithinSameParent(range);
 			expect(result)
 				.to.equal(true);
 			done();
 		});
 		it("should give selection is within same parent when start container and end container are same", function(done) {
 			var range = {startContainer: 1, endContainer: 2};
-			var result = Hiliter.isSelectionWithinSameParent(range);
+			var result = Rangey.isSelectionWithinSameParent(range);
 			expect(result)
 				.to.equal(false);
 			done();
