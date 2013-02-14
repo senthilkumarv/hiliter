@@ -159,6 +159,13 @@ var Hiliter = (function() {
 		return strippedContent;
 	};
 	
+	var getSelectedHighlight = function() {
+		var range = window.getSelection()
+			.getRangeAt(0);
+		var parent = range.startContainer.parentElement;
+		return parent.getAttribute("data-highlight-id");
+	};
+	
 	var highlight = function(containerSelector, className, highlightId) {
 		var range = window.getSelection()
 			.getRangeAt(0);
@@ -206,6 +213,7 @@ var Hiliter = (function() {
 		sanitize: sanitize,
 		isSelectionWithinSameParent: isSelectionWithinSameParent,
 		highlightTagWithId: highlightTagWithId,
-		removeHighlight: removeHighlight
+		removeHighlight: removeHighlight,
+		getSelectedHighlight: getSelectedHighlight
 	};
 })();
