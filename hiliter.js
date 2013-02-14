@@ -183,6 +183,8 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		rangey.isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);
 		var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
 		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
+		if(offset.startOffset === offset.endOffset) 
+			return null;
 		var highlightData = {
 			guid: highlightId,
 			commonAncestorPosition: nodeFinder.findNodePosition({

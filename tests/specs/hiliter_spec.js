@@ -72,6 +72,30 @@ describe("Highlighter", function() {
 			done();
 		});
 	});
+	describe("highlight", function() {
+		var mockMarker, mockRangey, mockFinder, hiliter;
+		beforeEach(function(done) {
+			mockMarker = { setStartMarkerAt: function() {}, setEndMarkerAt: function() {}, sanitize: function() {}};
+			mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 1}; }, convertTextOffsetToDocumentOffset: function() {} };
+			mockFinder = { findNonHighlightAncestor: function(){ return { innerHTML: "" }; }, findNodePosition: function(){ return 0; } };	
+			hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
+			window.getSelection = function() { return { getRangeAt: function() { return {};} }};
+			done();
+		});
+		it("should not add highlight when start and end text offsets are same", function(done) {			
+			var result = hiliter.highlight("", "", "");
+			expect(result).to.equal(null);
+			done();
+		});	
+		it("should return highlight obj when start and end text offsets are not same", function(done) {			
+			mockRangey.offsetFromContainer = function(){ return { startOffset: 1, endOffset: 2}; }
+			var result = hiliter.highlight("", "", "");
+			expect(result.commonAncestorPosition).to.equal(0);
+			expect(result.startOffset).to.equal(1);
+			expect(result.endOffset).to.equal(2);
+			done();
+		});			
+	});
 	describe("Remove highlight", function() {
 		it("should remove highlights with given identifier", function(done) {
 			var doc = $('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>. Some more text here.</div>')[0];
