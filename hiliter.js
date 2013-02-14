@@ -1,25 +1,4 @@
-var Hiliter = (function() {
-	var getNonHighlightAncestorContainer = function(range) {
-		var commonAncestor = range.commonAncestorContainer;
-		while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
-			commonAncestor = commonAncestor.parentElement;
-		}
-		return commonAncestor;
-	};
-
-	var createWrapperWithIdentifier = function(identifier, type) {
-		var element = document.createElement('span');
-		element.setAttribute('data-identifier', type + "_" + identifier);
-		return element;
-	};
-
-	var wrapElementFromOffset = function(data) {
-		var newRange = document.createRange();
-		newRange.setStart(data.element, data.startOffset);
-		newRange.setEnd(data.element, data.endOffset);
-		newRange.surroundContents(data.wrapper);
-	};
-
+var Rangey = (function() {
 	var calculateOffsetTill = function(container, endIndex) {
 		var insideTag = false;
 		var index = 1;
@@ -60,6 +39,34 @@ var Hiliter = (function() {
 		}
 		return i;
 	};
+	
+	return {
+		offsetFromContainer: offsetFromContainer,
+		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset				
+	};	
+})();
+var Hiliter = (function(rangey) {
+	var getNonHighlightAncestorContainer = function(range) {
+		var commonAncestor = range.commonAncestorContainer;
+		while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
+			commonAncestor = commonAncestor.parentElement;
+		}
+		return commonAncestor;
+	};
+
+	var createWrapperWithIdentifier = function(identifier, type) {
+		var element = document.createElement('span');
+		element.setAttribute('data-identifier', type + "_" + identifier);
+		return element;
+	};
+
+	var wrapElementFromOffset = function(data) {
+		var newRange = document.createRange();
+		newRange.setStart(data.element, data.startOffset);
+		newRange.setEnd(data.element, data.endOffset);
+		newRange.surroundContents(data.wrapper);
+	};
+
 
 	var sanitize = function(content, identifier) {
 		var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(\\s*)(</span>)", 'g');
@@ -72,8 +79,8 @@ var Hiliter = (function() {
 
 	var addHighlight = function(content, highlight) {
 		var nodeContent = content.innerHTML;
-		var startOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
-		var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
+		var startOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
+		var endOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
 		var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.highlightClass);
 		for (var i = startOffset - 1; i < endOffset; i++) {
 			htmlElement += nodeContent[i];
@@ -173,7 +180,7 @@ var Hiliter = (function() {
 			.getTime());
 		isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);
 		var commonAncestor = getNonHighlightAncestorContainer(range);
-		var offset = offsetFromContainer(commonAncestor.innerHTML, highlightId);
+		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		var highlightData = {
 			guid: highlightId,
 			commonAncestorPosition: findNodePosition({
@@ -208,12 +215,12 @@ var Hiliter = (function() {
 		findNodeByPosition: findNodeByPosition,
 		findNodePosition: findNodePosition,
 		addHighlight: addHighlight,
-		offsetFromContainer: offsetFromContainer,
-		convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset,
 		sanitize: sanitize,
 		isSelectionWithinSameParent: isSelectionWithinSameParent,
 		highlightTagWithId: highlightTagWithId,
 		removeHighlight: removeHighlight,
 		getSelectedHighlight: getSelectedHighlight
 	};
-})();
+})(Rangey);
+
+

@@ -2,7 +2,7 @@ describe("Highlighter", function() {
 	describe("Offset", function() {
 		it("should calculate text offset from given container", function(done) {
 			var text = "<div>The <span data-identifier=\"start_12345678\">quick</span> brown fox <span>jumps <span data-identifier=\"end_12345678\">over</span> the lazy dog</span>. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.</div>";
-			var offsets = Hiliter.offsetFromContainer(text, "12345678");
+			var offsets = Rangey.offsetFromContainer(text, "12345678");
 			expect(offsets.startOffset)
 				.to.equal(5);
 			expect(offsets.endOffset)
@@ -21,7 +21,7 @@ describe("Highlighter", function() {
 
 		it("should transform text offset to document offset", function(done) {
 			var doc = '<div>Hello World.</div>';
-			var documentOffset = Hiliter.convertTextOffsetToDocumentOffset(doc, 6);
+			var documentOffset = Rangey.convertTextOffsetToDocumentOffset(doc, 6);
 			expect(documentOffset)
 				.to.equal(11);
 			done();
