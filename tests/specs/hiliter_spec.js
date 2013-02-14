@@ -30,7 +30,7 @@ describe("Highlighter", function() {
 		it("should add the highlight tag for the give text range", function(done) {
 			var doc = $("<div>Hello World. Some more text here.</div>")[0];
 			Hiliter.addHighlight(doc, {
-				id: 1,
+				guid: 1,
 				startOffset: 7,
 				endOffset: 12,
 				highlightClass: 'highlight'
@@ -43,7 +43,7 @@ describe("Highlighter", function() {
 		it("should not add empty highlight spans for nested tags", function(done) {
 			var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
 			Hiliter.addHighlight(doc, {
-				id: 1,
+				guid: 1,
 				startOffset: 2,
 				endOffset: 23,
 				highlightClass: 'highlight'
@@ -56,7 +56,7 @@ describe("Highlighter", function() {
 		it("should add highlight for nested tags", function(done) {
 			var doc = $("<div><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
 			Hiliter.addHighlight(doc, {
-				id: 1,
+				guid: 1,
 				startOffset: 2,
 				endOffset: 23,
 				highlightClass: 'highlight'

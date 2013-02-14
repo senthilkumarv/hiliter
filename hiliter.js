@@ -35,9 +35,9 @@ var Hiliter = (function() {
 		return index;
 	};
 
-	var offsetFromContainer = function(content, instance) {
-		var startOffset = content.indexOf("<span data-identifier=\"start_" + instance + "\"")
-		var endOffset = content.indexOf("<span data-identifier=\"end_" + instance + "\"")
+	var offsetFromContainer = function(content, identifier) {
+		var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"")
+		var endOffset = content.indexOf("<span data-identifier=\"end_" + identifier + "\"")
 		endOffset = content.indexOf("</span>", endOffset);
 		return {
 			startOffset: calculateOffsetTill(content, startOffset),
@@ -61,8 +61,8 @@ var Hiliter = (function() {
 		return i;
 	};
 
-	var sanitize = function(content, id) {
-		var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + id + "\\2[^>]*>)(\\s*)(</span>)", 'g');
+	var sanitize = function(content, identifier) {
+		var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(\\s*)(</span>)", 'g');
 		return content.replace(regex, '');
 	};
 
@@ -74,14 +74,14 @@ var Hiliter = (function() {
 		var nodeContent = content.innerHTML;
 		var startOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
 		var endOffset = convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
-		var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.id, highlight.highlightClass);
+		var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.highlightClass);
 		for (var i = startOffset - 1; i < endOffset; i++) {
 			htmlElement += nodeContent[i];
 			if (nodeContent[i] === '<') htmlElement += "/span><";
-			if (nodeContent[i] === '>') htmlElement += highlightTagWithId(highlight.id, highlight.highlightClass);
+			if (nodeContent[i] === '>') htmlElement += highlightTagWithId(highlight.guid, highlight.highlightClass);
 		}
 		htmlElement += "</span>";
-		content.innerHTML = sanitize(htmlElement, highlight.id) + nodeContent.substring(endOffset);
+		content.innerHTML = sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
 	};
 
 	var findNodePosition = function(data) {
@@ -112,33 +112,33 @@ var Hiliter = (function() {
 		}
 	};
 
-	var wrapSelectionWithDifferentParents = function(range, instanceId) {
+	var wrapSelectionWithDifferentParents = function(range, identifier) {
 		wrapElementFromOffset({
 			element: range.startContainer,
 			startOffset: range.startOffset,
 			endOffset: range.startContainer.length,
-			wrapper: createWrapperWithIdentifier(instanceId, "start")
+			wrapper: createWrapperWithIdentifier(identifier, "start")
 		});
 		wrapElementFromOffset({
 			element: range.endContainer,
 			startOffset: 0,
 			endOffset: range.endOffset,
-			wrapper: createWrapperWithIdentifier(instanceId, "end")
+			wrapper: createWrapperWithIdentifier(identifier, "end")
 		});
 	};
 
-	var wrapSelectionWithSameParent = function(range, instanceId) {
+	var wrapSelectionWithSameParent = function(range, identifier) {
 		wrapElementFromOffset({
 			element: range.startContainer,
 			startOffset: range.startOffset,
 			endOffset: range.startOffset,
-			wrapper: createWrapperWithIdentifier(instanceId, "start")
+			wrapper: createWrapperWithIdentifier(identifier, "start")
 		});
 		wrapElementFromOffset({
 			element: range.endContainer,
 			startOffset: range.endOffset,
 			endOffset: range.endOffset,
-			wrapper: createWrapperWithIdentifier(instanceId, "end")
+			wrapper: createWrapperWithIdentifier(identifier, "end")
 		});
 	};
 
@@ -155,7 +155,7 @@ var Hiliter = (function() {
 		var commonAncestor = getNonHighlightAncestorContainer(range);
 		var offset = offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		var highlightData = {
-			id: highlightId,
+			guid: highlightId,
 			commonAncestorPosition: findNodePosition({
 				nodeToFind: commonAncestor,
 				content: document,
