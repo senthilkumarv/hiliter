@@ -51,20 +51,27 @@ var Rangey = (function() {
 	};	
 })();
 
-var Helper = (function() {
-	var createWrapperWithIdentifier = function(identifier, type) {
+var Marker = (function() {
+	var createMarkerWithIdentifier = function(identifier, type) {
 		var element = document.createElement('span');
 		element.setAttribute('data-identifier', type + "_" + identifier);
 		return element;
 	};
 
-	var wrapElementFromOffset = function(data) {
+	var wrapRangeWithMarker = function(element, startOffset, endOffset, marker) {
 		var newRange = document.createRange();
-		newRange.setStart(data.element, data.startOffset);
-		newRange.setEnd(data.element, data.endOffset);
-		newRange.surroundContents(data.wrapper);
+		newRange.setStart(element, startOffset);
+		newRange.setEnd(element, endOffset);
+		newRange.surroundContents(marker);
 	};
 
+	var setStartMarkerAt = function(identifier, element, startOffset, endOffset) {
+		wrapRangeWithMarker(element, startOffset, endOffset, createMarkerWithIdentifier(identifier, "start"));
+	};
+
+	var setEndMarkerAt = function(identifier, element, startOffset, endOffset) {
+		wrapRangeWithMarker(element, startOffset, endOffset, createMarkerWithIdentifier(identifier, "end"));
+	};
 
 	var sanitize = function(content, identifier) {
 		var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(\\s*)(</span>)", 'g');
@@ -72,20 +79,53 @@ var Helper = (function() {
 	};	
 	
 	return {
-		createWrapperWithIdentifier: createWrapperWithIdentifier,
-		wrapElementFromOffset: wrapElementFromOffset,
+		setStartMarkerAt: setStartMarkerAt,
+		setEndMarkerAt: setEndMarkerAt,
 		sanitize: sanitize
 	};
 })();
 
-var Hiliter = (function(rangey, helper) {
-	var getNonHighlightAncestorContainer = function(range) {
-		var commonAncestor = range.commonAncestorContainer;
+var Finder = (function() {
+	var filter = function(node) {
+		if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
+		return NodeFilter.FILTER_SKIP;
+	};
+
+	var findNodePosition = function(data) {
+		var node, index = 0;
+		var nodes = document.createNodeIterator(data.content.querySelector(data.relativeTo), NodeFilter.SHOW_ELEMENT, filter, false);
+		while ((node = nodes.nextNode()) != null) {
+			index++;
+			if (node == data.nodeToFind) break;
+		}
+		return index;
+	};
+
+	var findNodeByPosition = function(data) {
+		var index = 0;
+		var relativeTo = document.querySelector(data.relativeTo);
+		var nodes = document.createNodeIterator((relativeTo) ? relativeTo : data.content, NodeFilter.SHOW_ELEMENT, filter, false);
+		while ((node = nodes.nextNode()) != null) {
+			index++;
+			if (index == data.nodePosition) return node;
+		}
+	};	
+	
+	var findNonHighlightAncestor = function(commonAncestor) {
 		while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
 			commonAncestor = commonAncestor.parentElement;
 		}
 		return commonAncestor;
 	};
+	
+	return {
+		findNodePosition: findNodePosition,
+		findNodeByPosition: findNodeByPosition,
+		findNonHighlightAncestor: findNonHighlightAncestor
+	};
+})();
+
+var Hiliter = (function(rangey, marker, nodeFinder) {
 
 	var highlightTagWithId = function(id, className) {
 		return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
@@ -102,65 +142,17 @@ var Hiliter = (function(rangey, helper) {
 			if (nodeContent[i] === '>') htmlElement += highlightTagWithId(highlight.guid, highlight.highlightClass);
 		}
 		htmlElement += "</span>";
-		content.innerHTML = helper.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
-	};
-
-	var findNodePosition = function(data) {
-		var filter = function(node) {
-			if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
-			return NodeFilter.FILTER_SKIP;
-		};
-		var node, index = 0;
-		var nodes = document.createNodeIterator(data.content.querySelector(data.relativeTo), NodeFilter.SHOW_ELEMENT, filter, false);
-		while ((node = nodes.nextNode()) != null) {
-			index++;
-			if (node == data.nodeToFind) break;
-		}
-		return index;
-	};
-
-	var findNodeByPosition = function(data) {
-		var filter = function(node) {
-			if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
-			return NodeFilter.FILTER_SKIP;
-		};
-		var index = 0;
-		var relativeTo = document.querySelector(data.relativeTo);
-		var nodes = document.createNodeIterator((relativeTo) ? relativeTo : data.content, NodeFilter.SHOW_ELEMENT, filter, false);
-		while ((node = nodes.nextNode()) != null) {
-			index++;
-			if (index == data.nodePosition) return node;
-		}
+		content.innerHTML = marker.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
 	};
 
 	var wrapSelectionWithDifferentParents = function(range, identifier) {
-		helper.wrapElementFromOffset({
-			element: range.startContainer,
-			startOffset: range.startOffset,
-			endOffset: range.startContainer.length,
-			wrapper: helper.createWrapperWithIdentifier(identifier, "start")
-		});
-		helper.wrapElementFromOffset({
-			element: range.endContainer,
-			startOffset: 0,
-			endOffset: range.endOffset,
-			wrapper: helper.createWrapperWithIdentifier(identifier, "end")
-		});
+		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startContainer.length);
+		marker.setEndMarkerAt(identifier, range.endContainer, 0, range.endOffset);
 	};
 
 	var wrapSelectionWithSameParent = function(range, identifier) {
-		helper.wrapElementFromOffset({
-			element: range.startContainer,
-			startOffset: range.startOffset,
-			endOffset: range.startOffset,
-			wrapper: helpers.createWrapperWithIdentifier(identifier, "start")
-		});
-		helper.wrapElementFromOffset({
-			element: range.endContainer,
-			startOffset: range.endOffset,
-			endOffset: range.endOffset,
-			wrapper: helpers.createWrapperWithIdentifier(identifier, "end")
-		});
+		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
+		marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
 	};
 
 	var removeHighlight = function(content, identifier) {
@@ -189,11 +181,11 @@ var Hiliter = (function(rangey, helper) {
 		var highlightId = (highlightId) ? highlightId : (new Date()
 			.getTime());
 		rangey.isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);
-		var commonAncestor = getNonHighlightAncestorContainer(range);
+		var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
 		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		var highlightData = {
 			guid: highlightId,
-			commonAncestorPosition: findNodePosition({
+			commonAncestorPosition: nodeFinder.findNodePosition({
 				nodeToFind: commonAncestor,
 				content: document,
 				relativeTo: containerSelector,
@@ -210,7 +202,7 @@ var Hiliter = (function(rangey, helper) {
 
 	var loadHighlights = function(containerSelector, highlights) {
 		for (var i = 0; i < highlights.length; i++) {
-			var commonAncestor = findNodeByPosition({
+			var commonAncestor = nodeFinder.findNodeByPosition({
 				nodePosition: highlights[i].commonAncestorPosition,
 				content: document.body,
 				relativeTo: containerSelector,
@@ -223,13 +215,11 @@ var Hiliter = (function(rangey, helper) {
 	return {
 		loadHighlights: loadHighlights,
 		highlight: highlight,
-		findNodeByPosition: findNodeByPosition,
-		findNodePosition: findNodePosition,
 		addHighlight: addHighlight,
 		highlightTagWithId: highlightTagWithId,
 		removeHighlight: removeHighlight,
 		getSelectedHighlight: getSelectedHighlight
 	};
-})(Rangey, Helper);
+})(Rangey, Marker, Finder);
 
 
