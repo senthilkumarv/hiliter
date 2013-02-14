@@ -168,7 +168,7 @@ describe("Highlighter", function() {
 				.to.equal(true);
 			done();
 		});
-		it("should give selection is within same parent when start container and end container are same", function(done) {
+		it("should not give selection is within same parent when start container and end container are not same", function(done) {
 			var range = {startContainer: 1, endContainer: 2};
 			var result = Rangey.isSelectionWithinSameParent(range);
 			expect(result)
