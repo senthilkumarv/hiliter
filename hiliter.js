@@ -146,6 +146,19 @@ var Hiliter = (function() {
 		return range.startContainer == range.endContainer;
 	};
 
+	var removeHighlight = function(content, identifier) {
+	    var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(.*?)(</span>)",'g');
+	    var strippedContent = content.innerHTML;
+	    while(true) {
+			var temp = strippedContent.replace(regex, "$3");
+			if(strippedContent === temp) 
+			    break;
+			strippedContent = temp;
+	    }
+		content.innerHTML = strippedContent;
+		return strippedContent;
+	};
+	
 	var highlight = function(containerSelector, className, highlightId) {
 		var range = window.getSelection()
 			.getRangeAt(0);
@@ -193,5 +206,6 @@ var Hiliter = (function() {
 		sanitize: sanitize,
 		isSelectionWithinSameParent: isSelectionWithinSameParent,
 		highlightTagWithId: highlightTagWithId,
+		removeHighlight: removeHighlight
 	};
 })();

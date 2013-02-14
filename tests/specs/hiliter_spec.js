@@ -72,6 +72,29 @@ describe("Highlighter", function() {
 			done();
 		});
 	});
+	describe("Remove highlight", function() {
+		it("should remove highlights with given identifier", function(done) {
+			var doc = $('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>. Some more text here.</div>')[0];
+			Hiliter.removeHighlight(doc, 1);
+			expect(doc.innerHTML)
+				.to.equal("Hello World. Some more text here.");
+			done();
+		});
+		it("should not remove highlights that does not match the given identifier", function(done) {
+			var doc = $('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>. <span data-highlight-id=\"2\" class=\"highlight\">Some</span> more text here.</div>')[0];
+			Hiliter.removeHighlight(doc, 1);
+			expect(doc.innerHTML)
+				.to.equal("Hello World. <span data-highlight-id=\"2\" class=\"highlight\">Some</span> more text here.");
+			done();
+		});
+		it("should remove highlights with given identifier even when they are nested ", function(done) {
+			var doc = $('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">Wo<span data-highlight-id=\"1\" class=\"highlight\">rl</span>d</span>. Some more text here.</div>')[0];
+			Hiliter.removeHighlight(doc, 1);
+			expect(doc.innerHTML)
+				.to.equal("Hello World. Some more text here.");
+			done();
+		});		
+	});
 	describe("Find node position from root", function() {
 		it("should find the position relative to give root", function(done) {
 			var doc = $("<div><div id=\"root\"><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
