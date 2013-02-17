@@ -1,4 +1,8 @@
 describe("Highlighter", function() {
+	beforeEach(function(done) {
+		$("#content").html("");
+		done();
+	});		
 	describe("Offset", function() {
 		it("should calculate text offset from given container", function(done) {
 			var text = "<div>The <span data-identifier=\"start_12345678\">quick</span> brown fox <span>jumps <span data-identifier=\"end_12345678\">over</span> the lazy dog</span>. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.</div>";
@@ -175,5 +179,46 @@ describe("Highlighter", function() {
 				.to.equal(false);
 			done();
 		});		
+	});
+	describe("Marker", function() {
+		it("should set start marker at given offset", function(done) {
+			$("#content").html("Set Markers");
+			Marker.setStartMarkerAt("123", document.getElementById("content"), 0, 0);
+			expect($("#content").html()).to.equal("<span data-identifier=\"start_123\"></span>Set Markers");
+			done();
+		});		
+		it("should set end marker at given offset", function(done) {
+			$("#content").html("Set Markers");
+			Marker.setEndMarkerAt("123", document.getElementById("content"), 0, 0);
+			expect($("#content").html()).to.equal("<span data-identifier=\"end_123\"></span>Set Markers");
+			done();
+		});
+	});
+	describe("Finder", function() {
+		it("should find non highlight parent", function(done) {
+			$("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
+			var parent = Finder.findNonHighlightAncestor(document.getElementById("highlight1").childNodes[0]);
+			expect(parent).to.equal(document.getElementById("content"));
+			done();
+		});
+	});
+	describe("load highlight", function() {
+		var mockMarker, mockRangey, mockFinder, hiliter, findNodeByPositionStub;
+		beforeEach(function(done) {
+			findNodeByPositionStub = sinon.mock().returns($("#content")[0]);
+			mockMarker = { setStartMarkerAt: function() {}, setEndMarkerAt: function() {}, sanitize: function() {}};
+			mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 1}; }, convertTextOffsetToDocumentOffset: function() {} };
+			mockFinder = { findNonHighlightAncestor: function(){ return { innerHTML: "" }; }, findNodePosition: function(){ return 0; }, findNodeByPosition: findNodeByPositionStub};	
+			hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
+			window.getSelection = function() { return { getRangeAt: function() { return {};} }};
+			done();
+		});		
+		it("should load highlights from given list", function(done) {
+			var doc = $("#content").html("<div>Hello World. Some more text here.</div>");;
+			findNodeByPositionStub.twice();
+			hiliter.loadHighlights("#content", [{commonAncestorPosition: 0, startOffset: 1, endOffset: 5}, {commonAncestorPosition: 0, startOffset: 7, endOffset: 12}]);
+			findNodeByPositionStub.verify();
+			done();
+		});
 	});
 });
