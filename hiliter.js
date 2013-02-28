@@ -146,8 +146,8 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	};
 
 	var wrapSelectionWithDifferentParents = function(range, identifier) {
-		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startContainer.length);
-		marker.setEndMarkerAt(identifier, range.endContainer, 0, range.endOffset);
+		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
+		marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
 	};
 
 	var wrapSelectionWithSameParent = function(range, identifier) {
@@ -176,7 +176,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	};
 	
 	var highlight = function(containerSelector, className, highlightId) {
-		var range = window.getSelection()
+    var range = window.getSelection()
 			.getRangeAt(0);
 		var highlightId = (highlightId) ? highlightId : (new Date()
 			.getTime());
