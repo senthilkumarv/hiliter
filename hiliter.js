@@ -130,10 +130,43 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	var highlightTagWithId = function(id, className) {
 		return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
 	};
+  
+  var getExistingHighlight = function(content, markerId){
+    if(!content || !content.innerHTML) return;
+    var node;
+		var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
+
+    function moveToStartNode(nodes){
+      var node;
+      while((node = nodes.nextNode()) !== null) {
+        if(node.getAttribute("data-identifier")==="start_" + markerId){
+          break;
+        }
+      }
+    }
+
+    moveToStartNode(nodes);
+
+    while ((node = nodes.nextNode()) !== null) {
+      var highlightAttributeId = node.getAttribute("data-highlight-id");
+      if(highlightAttributeId){
+        return highlightAttributeId;
+      }
+      if(node.getAttribute("data-identifier")==="end_" + markerId){
+        return;
+      }
+    }
+    return;
+  }
 
 	var addHighlight = function(content, highlight) {
-		var nodeContent = content.innerHTML;
-		var startOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
+    var nodeContent = content.innerHTML;
+    existingHighlightId = getExistingHighlight(content, highlight.guid);
+    
+    nodeContent = removeHighlight(content, existingHighlightId);
+
+    highlight.guid = existingHighlightId|| highlight.guid;
+    var startOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
 		var endOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
 		var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.highlightClass);
 		for (var i = startOffset - 1; i < endOffset; i++) {
@@ -145,12 +178,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		content.innerHTML = marker.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
 	};
 
-	var wrapSelectionWithDifferentParents = function(range, identifier) {
-		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
-		marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
-	};
-
-	var wrapSelectionWithSameParent = function(range, identifier) {
+	var wrapSelection = function(range, identifier) {
 		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
 		marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
 	};
@@ -159,14 +187,15 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	    var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(.*?)(</span>)",'g');
 	    var strippedContent = content.innerHTML;
 	    while(true) {
-			var temp = strippedContent.replace(regex, "$3");
-			if(strippedContent === temp) 
-			    break;
-			strippedContent = temp;
+        var temp = strippedContent.replace(regex, "$3");
+        if(strippedContent === temp) 
+            break;
+        strippedContent = temp;
 	    }
 		content.innerHTML = strippedContent;
 		return strippedContent;
 	};
+
 	
 	var getSelectedHighlight = function() {
 		var range = window.getSelection()
@@ -180,7 +209,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 			.getRangeAt(0);
 		var highlightId = (highlightId) ? highlightId : (new Date()
 			.getTime());
-		rangey.isSelectionWithinSameParent(range) ? wrapSelectionWithSameParent(range, highlightId) : wrapSelectionWithDifferentParents(range, highlightId);
+		wrapSelection(range, highlightId); 
 		var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
 		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		if(offset.startOffset === offset.endOffset) 
@@ -198,6 +227,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 			highlightClass: className
 		};
 		addHighlight(commonAncestor, highlightData);
+
 		return highlightData;
 	};
 
@@ -216,9 +246,11 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	return {
 		loadHighlights: loadHighlights,
 		highlight: highlight,
+    getExistingHighlight:getExistingHighlight,
 		addHighlight: addHighlight,
 		highlightTagWithId: highlightTagWithId,
 		removeHighlight: removeHighlight,
+
 		getSelectedHighlight: getSelectedHighlight
 	};
 };

@@ -25,18 +25,6 @@ describe("Highlighter", function() {
 			done();
 		});
 
-		it("should update highlight when selection already contains a highlight", function(done) {
-			var doc = $('<div>Hello <span data-highlight-id="1" class="highlight">World</span>. Some more text here.</div>')[0];
-			Hiliter.addHighlight(doc, {
-				guid: 1,
-				startOffset: 7,
-				endOffset: 18,
-				highlightClass: 'highlight'
-			});
-			expect(doc.innerHTML)
-				.to.equal('Hello <span data-highlight-id=\"1\" class=\"highlight\">World. Some</span> more text here.');
-			done();
-		});
 
 		it("should not add empty highlight spans for nested tags", function(done) {
 			var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
@@ -70,6 +58,53 @@ describe("Highlighter", function() {
 			done();
 		});
 	});
+  describe("update highlight", function(){
+    describe("HasHighlight", function(){
+      it("is true when span with highlight exists", function(){
+
+        var docWithExistingHighlight = $('<div> <div id=\"container\">'+
+                                          '  <span data-identifier=\"start_111\"></span>'+
+                                          '  <div>'+
+                                          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
+                                          '    Some more '+
+                                          '    <span data-identifier=\"end_111\"></span>'+
+                                          '    text here.'+
+                                          '  </div>'+
+                                          '</div> </div>')[0];
+        var hasHighlight = Hiliter.getExistingHighlight(docWithExistingHighlight, "111");
+        expect(hasHighlight).to.equal('1'); 
+      });
+
+      it("is false when span with highlight does not exist", function(){
+
+        var docWithNoHighlight = $('<div> <div id=\"container\">'+
+                                          '  <div>'+
+                                          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
+                                          '  <span data-identifier=\"start_111\"></span>'+
+                                          '    Some more '+
+                                          '    <span data-identifier=\"end_111\"></span>'+
+                                          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
+                                          '    text here.'+
+                                          '  </div>'+
+                                          '</div> </div>')[0];
+        var hasHighlight = Hiliter.getExistingHighlight(docWithNoHighlight, "111");
+        expect(hasHighlight).to.equal(undefined); 
+      });
+    });
+
+    it("should update highlight when selection already contains a highlight", function(done) {
+      var doc = $('<div>Hello <span data-identifier="start_111"></span><span data-highlight-id="1" class="highlight">World</span>. Some<span data-identifier="end_111"></span> more text here.</div>')[0];
+      Hiliter.addHighlight(doc, {
+        guid: 111,
+        startOffset: 7,
+        endOffset: 18,
+        highlightClass: 'highlight'
+      });
+      expect(doc.innerHTML)
+        .to.equal('Hello <span data-identifier="start_111"></span><span data-highlight-id=\"1\" class=\"highlight\">World. Some</span><span data-identifier="end_111"></span> more text here.');
+      done();
+    });
+  });
 	describe("highlight", function() {
 		var mockMarker, mockRangey, mockFinder, hiliter;
 		beforeEach(function(done) {
