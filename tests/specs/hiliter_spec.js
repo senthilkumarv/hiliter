@@ -25,6 +25,19 @@ describe("Highlighter", function() {
 			done();
 		});
 
+		it("should update highlight when selection already contains a highlight", function(done) {
+			var doc = $('<div>Hello <span data-highlight-id="1" class="highlight">World</span>. Some more text here.</div>')[0];
+			Hiliter.addHighlight(doc, {
+				guid: 1,
+				startOffset: 7,
+				endOffset: 18,
+				highlightClass: 'highlight'
+			});
+			expect(doc.innerHTML)
+				.to.equal('Hello <span data-highlight-id=\"1\" class=\"highlight\">World. Some</span> more text here.');
+			done();
+		});
+
 		it("should not add empty highlight spans for nested tags", function(done) {
 			var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
 			Hiliter.addHighlight(doc, {
