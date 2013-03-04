@@ -57,64 +57,67 @@ describe("Highlighter", function() {
 				to.equal("<span data-highlight-id=\"1\" class=\"someClass\">");
 			done();
 		});
-	});
-  describe("update highlight", function(){
-    describe("HasHighlight", function(){
-      it("is true when span with highlight exists", function(){
+  });
+  describe("HasHighlight", function(){
+    it("is true when span with highlight exists", function(){
 
-        var docWithExistingHighlight = $('<div> <div id=\"container\">'+
-                                          '  <span data-identifier=\"start_111\"></span>'+
-                                          '  <div>'+
-                                          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
-                                          '    Some more '+
-                                          '    <span data-identifier=\"end_111\"></span>'+
-                                          '    text here.'+
-                                          '  </div>'+
-                                          '</div> </div>')[0];
-        var hasHighlight = Hiliter.getExistingHighlight(docWithExistingHighlight, "111");
-        expect(hasHighlight).to.equal('1'); 
-      });
-
-      it("is false when span with highlight does not exist", function(){
-
-        var docWithNoHighlight = $('<div> <div id=\"container\">'+
-                                          '  <div>'+
-                                          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
-                                          '  <span data-identifier=\"start_111\"></span>'+
-                                          '    Some more '+
-                                          '    <span data-identifier=\"end_111\"></span>'+
-                                          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
-                                          '    text here.'+
-                                          '  </div>'+
-                                          '</div> </div>')[0];
-        var hasHighlight = Hiliter.getExistingHighlight(docWithNoHighlight, "111");
-        expect(hasHighlight).to.equal(undefined); 
-      });
+      var docWithExistingHighlight = $('<div> <div id=\"container\">'+
+                                       '  <span data-identifier=\"start_111\"></span>'+
+                                       '  <div>'+
+                                       '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
+                                       '    Some more '+
+                                       '    <span data-identifier=\"end_111\"></span>'+
+                                       '    text here.'+
+                                       '  </div>'+
+                                       '</div> </div>')[0];
+      var hasHighlight = Hiliter.getExistingHighlight(docWithExistingHighlight, "111");
+      expect(hasHighlight).to.equal('1'); 
     });
 
-    it("should update highlight when selection already contains a highlight", function(done) {
-      var doc = $('<div>Hello <span data-identifier="start_111"></span><span data-highlight-id="1" class="highlight">World</span>. Some<span data-identifier="end_111"></span> more text here.</div>')[0];
-      Hiliter.addHighlight(doc, {
-        guid: 111,
-        startOffset: 7,
-        endOffset: 18,
-        highlightClass: 'highlight'
-      });
-      expect(doc.innerHTML)
-        .to.equal('Hello <span data-identifier="start_111"></span><span data-highlight-id=\"1\" class=\"highlight\">World. Some</span><span data-identifier="end_111"></span> more text here.');
-      done();
+    it("is false when span with highlight does not exist", function(){
+
+      var docWithNoHighlight = $('<div> <div id=\"container\">'+
+                                 '  <div>'+
+                                 '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
+                                 '  <span data-identifier=\"start_111\"></span>'+
+                                 '    Some more '+
+                                 '    <span data-identifier=\"end_111\"></span>'+
+                                 '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.'+
+                                 '    text here.'+
+                                 '  </div>'+
+                                 '</div> </div>')[0];
+      var hasHighlight = Hiliter.getExistingHighlight(docWithNoHighlight, "111");
+      expect(hasHighlight).to.equal(undefined); 
     });
   });
+
 	describe("highlight", function() {
 		var mockMarker, mockRangey, mockFinder, hiliter;
 		beforeEach(function(done) {
 			mockMarker = { setStartMarkerAt: function() {}, setEndMarkerAt: function() {}, sanitize: function() {}};
 			mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 1}; }, convertTextOffsetToDocumentOffset: function() {} };
-			mockFinder = { findNonHighlightAncestor: function(){ return { innerHTML: "" }; }, findNodePosition: function(){ return 0; } };	
+			mockFinder = { findNonHighlightAncestor: function(){
+                                                return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
+                                                   },
+                     findNodePosition: function(){ return 0; } };	
 			hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
 			window.getSelection = function() { return { getRangeAt: function() { return {};} }};
 			done();
 		});
+    it("should update highlight when selection already contains a highlight", function(done) {
+      var doc = $('<div><div id="content"><div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div></div></div>')[0];
+      mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 3}; }, convertTextOffsetToDocumentOffset: function() {} };
+      mockFinder = { findNonHighlightAncestor: function(){
+                                                          return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
+                                                          },
+                     findNodePosition: function(){ return 0; } };	
+
+      hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
+
+      highlightData = hiliter.highlight("#content","highlight","555");
+      expect(highlightData.guid).to.equal("111");
+      done();
+    });    
 		it("should not add highlight when start and end text offsets are same", function(done) {			
 			var result = hiliter.highlight("", "", "");
 			expect(result).to.equal(null);

@@ -161,11 +161,6 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 
 	var addHighlight = function(content, highlight) {
     var nodeContent = content.innerHTML;
-    existingHighlightId = getExistingHighlight(content, highlight.guid);
-    
-    nodeContent = removeHighlight(content, existingHighlightId);
-
-    highlight.guid = existingHighlightId|| highlight.guid;
     var startOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
 		var endOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
 		var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.highlightClass);
@@ -176,6 +171,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		}
 		htmlElement += "</span>";
 		content.innerHTML = marker.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
+    return highlight.guid;
 	};
 
 	var wrapSelection = function(range, identifier) {
@@ -214,20 +210,27 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		if(offset.startOffset === offset.endOffset) 
 			return null;
+
+    var ancestorPosition = nodeFinder.findNodePosition({
+      nodeToFind: commonAncestor,
+      content: document,
+      relativeTo: containerSelector,
+      highlightClass: className
+    });
+
+    existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
+    commonAncestor.innerHTML = removeHighlight(commonAncestor, existingHighlightId);
+    highlightId = existingHighlightId|| highlightId;
+
 		var highlightData = {
 			guid: highlightId,
-			commonAncestorPosition: nodeFinder.findNodePosition({
-				nodeToFind: commonAncestor,
-				content: document,
-				relativeTo: containerSelector,
-				highlightClass: className
-			}),
+			commonAncestorPosition: ancestorPosition,
 			startOffset: offset.startOffset,
 			endOffset: offset.endOffset,
 			highlightClass: className
 		};
-		addHighlight(commonAncestor, highlightData);
 
+    addHighlight(commonAncestor, highlightData);
 		return highlightData;
 	};
 
