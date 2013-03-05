@@ -136,16 +136,16 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     var node;
 		var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
 
-    function moveToStartNode(nodes){
-      var node;
-      while((node = nodes.nextNode()) !== null) {
-        if(node.getAttribute("data-identifier")==="start_" + markerId){
-          break;
+    var node;
+    while((node = nodes.nextNode()) !== null) {
+      if(node.getAttribute("data-identifier")==="start_" + markerId){
+        var highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
+        if(highlightAttributeId){
+          return highlightAttributeId;
         }
+        break;
       }
     }
-
-    moveToStartNode(nodes);
 
     while ((node = nodes.nextNode()) !== null) {
       var highlightAttributeId = node.getAttribute("data-highlight-id");
@@ -219,9 +219,9 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     });
 
     existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
+
     commonAncestor.innerHTML = removeHighlight(commonAncestor, existingHighlightId);
     highlightId = existingHighlightId|| highlightId;
-
 		var highlightData = {
 			guid: highlightId,
 			commonAncestorPosition: ancestorPosition,
