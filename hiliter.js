@@ -133,8 +133,12 @@ var Finder = (function() {
         }
       };
 
-      var getLastNode = function(hightlightId, selectionId){
-        return document.querySelector("[data-identifier='end_"+ selectionId + "']");
+      var getLastNode = function(content, highlightId, selectionId){
+        var endSelectionNode = content.querySelector("[data-identifier='end_"+ selectionId + "']");
+        if (endSelectionNode.parentNode.getAttribute("data-highlight-id") === highlightId){
+            return endSelectionNode.parentNode;
+        }
+        return endSelectionNode; 
       };
 	
 	return {
@@ -204,30 +208,31 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     }
   };
 
-	var wrapSelection = function(range, identifier) {
-		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
-		marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
-	};
+    var wrapSelection = function(range, identifier) {
+            marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
+            marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
+    };
 
-	var removeHighlight = function(content, identifier) {
-	    var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(.*?)(</span>)",'g');
-	    var strippedContent = content.innerHTML;
-	    while(true) {
-        var temp = strippedContent.replace(regex, "$3");
-        if(strippedContent === temp) 
-            break;
-        strippedContent = temp;
-	    }
-		content.innerHTML = strippedContent;
-		return strippedContent;
-	};
-	
-	var getSelectedHighlight = function() {
-		var range = window.getSelection()
-			.getRangeAt(0);
-		var parent = range.startContainer.parentElement;
-		return parent.getAttribute("data-highlight-id");
-	};
+    var removeHighlight = function(content, identifier) {
+        var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(.*?)(</span>)",'g');
+        var strippedContent = content.innerHTML;
+        console.log(strippedContent);
+        while(true) {
+            var temp = strippedContent.replace(regex, "$3");
+                if(strippedContent === temp) 
+                    break;
+                strippedContent = temp;
+           }
+        content.innerHTML = strippedContent;
+        return strippedContent;
+    };
+    
+    var getSelectedHighlight = function() {
+            var range = window.getSelection()
+                    .getRangeAt(0);
+            var parent = range.startContainer.parentElement;
+            return parent.getAttribute("data-highlight-id");
+    };
 
   var createRange = function(startNode, endNode){
     var range = document.createRange();
@@ -248,8 +253,9 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
     
     if(existingHighlightId){ 
-      var highlightStart = nodeFinder.getFirstNode(containerSelector, existingHighlightId, highlightId);
-      var highlightEnd = nodeFinder.getLastNode(existingHighlightId, highlightId);
+      var content = document.querySelector(containerSelector);
+      var highlightStart = nodeFinder.getFirstNode(content, existingHighlightId, highlightId);
+      var highlightEnd = nodeFinder.getLastNode(content, existingHighlightId, highlightId);
       var range = createRange(highlightStart, highlightEnd);
 
       wrapSelection(range, existingHighlightId); 
@@ -257,8 +263,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
       offset = rangey.offsetFromContainer(commonAncestor.innerHTML, existingHighlightId);
       if(offset.startOffset === offset.endOffset) 
         return null;
- 
-      highlightId = existingHighlightId;
+            highlightId = existingHighlightId;
     }
 
     var ancestorPosition = nodeFinder.findNodePosition({
