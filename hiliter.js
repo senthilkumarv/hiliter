@@ -117,12 +117,25 @@ var Finder = (function() {
 		}
 		return commonAncestor;
 	};
+
+  var getFirstNode = function(highlightId, selectionId){
+    var selectedNode = document.querySelector("[data-identifier='start_"+ selectionId + "']");
+    var highlightedNode = document.querySelector("[data-highlight-id='"+highlightId+"']");
+    return document.querySelector("[data-identifier='start_"+ selectionId + "']");
+  };
+
+  var getLastNode = function(hightlightId, selectionId){
+    return document.querySelector("[data-identifier='end_"+ selectionId + "']");
+  };
 	
 	return {
 		findNodePosition: findNodePosition,
 		findNodeByPosition: findNodeByPosition,
-		findNonHighlightAncestor: findNonHighlightAncestor
+		findNonHighlightAncestor: findNonHighlightAncestor,
+    getFirstNode: getFirstNode,
+    getLastNode: getLastNode
 	};
+
 })();
 
 var HiliterCls = function(rangey, marker, nodeFinder) {
@@ -135,8 +148,6 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     if(!content || !content.innerHTML) return;
     var node;
 		var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
-
-    var node;
     while((node = nodes.nextNode()) !== null) {
       if(node.getAttribute("data-identifier")==="start_" + markerId){
         var highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
@@ -161,6 +172,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 
 	var addHighlight = function(content, highlight) {
     var nodeContent = content.innerHTML;
+
     var startOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
 		var endOffset = rangey.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
 		var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.highlightClass);
@@ -171,8 +183,17 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		}
 		htmlElement += "</span>";
 		content.innerHTML = marker.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
+    removeMarkers(content);
     return highlight.guid;
 	};
+
+  var removeMarkers = function(content){
+    if(!content || !content.innerHTML) return;
+    var dataIdentifiers = content.querySelectorAll('[data-identifier]');
+    for(i=0;i<dataIdentifiers.length;i++){
+      dataIdentifiers[i].remove('data-identifier');
+    }
+  };
 
 	var wrapSelection = function(range, identifier) {
 		marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
@@ -191,7 +212,6 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		content.innerHTML = strippedContent;
 		return strippedContent;
 	};
-
 	
 	var getSelectedHighlight = function() {
 		var range = window.getSelection()
@@ -199,7 +219,14 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		var parent = range.startContainer.parentElement;
 		return parent.getAttribute("data-highlight-id");
 	};
-	
+
+  var createRange = function(startNode, endNode){
+    var range = document.createRange();
+    range.setStart(startNode, 0);
+    range.setEnd(endNode,0);
+    return range;
+  }
+
 	var highlight = function(containerSelector, className, highlightId) {
     var range = window.getSelection()
 			.getRangeAt(0);
@@ -210,6 +237,22 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
 		if(offset.startOffset === offset.endOffset) 
 			return null;
+    existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
+    
+    if(existingHighlightId){
+     
+      var highlightStart = nodeFinder.getFirstNode(existingHighlightId, highlightId);
+      var highlightEnd = nodeFinder.getLastNode(existingHighlightId, highlightId);
+      var range = createRange(highlightStart, highlightEnd);
+
+      wrapSelection(range, existingHighlightId); 
+      commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
+      offset = rangey.offsetFromContainer(commonAncestor.innerHTML, existingHighlightId);
+      if(offset.startOffset === offset.endOffset) 
+        return null;
+ 
+      highlightId = existingHighlightId;
+    }
 
     var ancestorPosition = nodeFinder.findNodePosition({
       nodeToFind: commonAncestor,
@@ -217,11 +260,6 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
       relativeTo: containerSelector,
       highlightClass: className
     });
-
-    existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
-
-    commonAncestor.innerHTML = removeHighlight(commonAncestor, existingHighlightId);
-    highlightId = existingHighlightId|| highlightId;
 		var highlightData = {
 			guid: highlightId,
 			commonAncestorPosition: ancestorPosition,

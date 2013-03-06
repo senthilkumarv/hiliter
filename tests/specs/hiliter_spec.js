@@ -119,12 +119,14 @@ describe("Highlighter", function() {
 		});
 
     it("should update highlight when selection already contains a highlight", function(done) {
-      var doc = $('<div><div id="content"><div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div></div></div>')[0];
       mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 3}; }, convertTextOffsetToDocumentOffset: function() {} };
       mockFinder = { findNonHighlightAncestor: function(){
                                                           return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
                                                           },
-                     findNodePosition: function(){ return 0; } };	
+                                                          findNodePosition: function(){ return 0; },
+                                                          getFirstNode: function(){return $('<span data-identifier="start_555"></span>')[0];},
+                                                          getLastNode: function(){return $('<span data-identifier="end_555"></span>')[0] ;}
+      };	
 
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
 
@@ -132,6 +134,23 @@ describe("Highlighter", function() {
       expect(highlightData.guid).to.equal("111");
       done();
     });    
+    it("should update highlight data when selection starts at the end of an existing highlight", function(done){
+      mockFinder = { findNonHighlightAncestor: function(){
+                            return $('<div>You can <span data-highlight-id="111" class="highlight">select <span data-identifier="start_555"></span> some random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
+                            },
+                            findNodePosition: function(){ return 0; },
+                            getFirstNode: function(){return $('<span data-identifier="start_555"></span>')[0];},
+                            getLastNode: function(){return $('<span data-identifier="end_555"></span>')[0] ;}};	
+
+      hiliter = new HiliterCls(Rangey, mockMarker, mockFinder);
+
+      highlightData = hiliter.highlight("#content","highlight","555");
+      expect(highlightData.guid).to.equal("111");
+      expect(highlightData.startOffset).to.equal(1);
+      expect(highlightData.endOffset).to.equal(27);
+      done();
+
+    });
 
 		it("should not add highlight when start and end text offsets are same", function(done) {			
 			var result = hiliter.highlight("", "", "");
@@ -270,7 +289,7 @@ describe("Highlighter", function() {
 				.to.equal(11);
 			done();
 		});
-			
+
 	});
 	describe("Marker", function() {
 		it("should set start marker at given offset", function(done) {
