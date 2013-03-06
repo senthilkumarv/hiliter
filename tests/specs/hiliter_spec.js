@@ -104,19 +104,19 @@ describe("Highlighter", function() {
 
   });
 
-	describe("highlight", function() {
-		var mockMarker, mockRangey, mockFinder, hiliter;
-		beforeEach(function(done) {
-			mockMarker = { setStartMarkerAt: function() {}, setEndMarkerAt: function() {}, sanitize: function() {}};
-			mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 1}; }, convertTextOffsetToDocumentOffset: function() {} };
-			mockFinder = { findNonHighlightAncestor: function(){
-                                                return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
-                                                   },
-                     findNodePosition: function(){ return 0; } };	
-			hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
-			window.getSelection = function() { return { getRangeAt: function() { return {};} }};
-			done();
-		});
+    describe("highlight", function() {
+            var mockMarker, mockRangey, mockFinder, hiliter;
+            beforeEach(function(done) {
+                    mockMarker = { setStartMarkerAt: function() {}, setEndMarkerAt: function() {}, sanitize: function() {}};
+                    mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 1}; }, convertTextOffsetToDocumentOffset: function() {} };
+                    mockFinder = { findNonHighlightAncestor: function(){
+                                            return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
+                                               },
+                 findNodePosition: function(){ return 0; } };	
+                    hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
+                    window.getSelection = function() { return { getRangeAt: function() { return {};} }};
+                    done();
+            });
 
     it("should update highlight when selection already contains a highlight", function(done) {
       mockRangey = { isSelectionWithinSameParent: function() { return true; }, offsetFromContainer: function(){ return { startOffset: 1, endOffset: 3}; }, convertTextOffsetToDocumentOffset: function() {} };
@@ -251,6 +251,23 @@ describe("Highlighter", function() {
 				.to.equal(nodeToFind);
 			done();
 		});
+		
+		it("should give the highlight node as first node between highlight id and selection id.", function(done) {
+			var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div><span data-identifier = \"start_2\">this is the selection highlight</span>.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+			var highlightNode = doc.querySelector('[data-highlight-id=\"1\"]');
+			var node = Finder.getFirstNode(doc,"1","2");
+			expect(node).to.equal(highlightNode);
+			done();
+		});
+		
+		it("should give the selection node as first node between highlight id and selection id.", function(done) {
+			var doc = $("<div><div id=\"root\"><div>Lorem <span data-identifier=\"start_1\" class= 'highlight'>ipsum </span>dolor</div><span data-highlight-id = \"2\">this is the selection highlight</span>.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+			var selectionNode = doc.querySelector('[data-identifier=\"start_1\"]');
+			var node = Finder.getFirstNode(doc,"2","1");
+			expect(node).to.equal(selectionNode);
+			done();
+		});
+
 		it("should find non highlight parent", function(done) {
 			$("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
 			var parent = Finder.findNonHighlightAncestor(document.getElementById("highlight1").childNodes[0]);

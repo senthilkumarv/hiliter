@@ -103,13 +103,18 @@ var Finder = (function() {
 
 	var findNodeByPosition = function(data) {
 		var index = 0;
-		var relativeTo = document.querySelector(data.relativeTo);
-		var nodes = document.createNodeIterator((relativeTo) ? relativeTo : data.content, NodeFilter.SHOW_ELEMENT, filter, false);
+
+                var relativeTo = document.querySelector(data.relativeTo);
+                var nodes = getNodes(relativeTo||data.content, filter);
 		while ((node = nodes.nextNode()) != null) {
 			index++;
 			if (index == data.nodePosition) return node;
 		}
 	};	
+
+        var getNodes = function(content, filter){
+            return document.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, filter, false);
+        }
 	
 	var findNonHighlightAncestor = function(commonAncestor) {
 		while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
@@ -118,15 +123,19 @@ var Finder = (function() {
 		return commonAncestor;
 	};
 
-  var getFirstNode = function(highlightId, selectionId){
-    var selectedNode = document.querySelector("[data-identifier='start_"+ selectionId + "']");
-    var highlightedNode = document.querySelector("[data-highlight-id='"+highlightId+"']");
-    return document.querySelector("[data-identifier='start_"+ selectionId + "']");
-  };
+      var getFirstNode = function(content, highlightId, selectionId){
+        var nodes = getNodes(content);
+        while((node = nodes.nextNode()) != null){
+           if(node.getAttribute("data-identifier") === "start_"+ selectionId 
+              || node.getAttribute("data-highlight-id") === highlightId ) {
+                return node;
+           }
+        }
+      };
 
-  var getLastNode = function(hightlightId, selectionId){
-    return document.querySelector("[data-identifier='end_"+ selectionId + "']");
-  };
+      var getLastNode = function(hightlightId, selectionId){
+        return document.querySelector("[data-identifier='end_"+ selectionId + "']");
+      };
 	
 	return {
 		findNodePosition: findNodePosition,
@@ -227,21 +236,19 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     return range;
   }
 
-	var highlight = function(containerSelector, className, highlightId) {
-    var range = window.getSelection()
-			.getRangeAt(0);
-		var highlightId = (highlightId) ? highlightId : (new Date()
-			.getTime());
-		wrapSelection(range, highlightId); 
-		var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
-		var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
-		if(offset.startOffset === offset.endOffset) 
-			return null;
+  var highlight = function(containerSelector, className, highlightId) {
+    var range = window.getSelection().getRangeAt(0);
+    var highlightId = (highlightId) ? highlightId : (new Date().getTime());
+    
+    wrapSelection(range, highlightId); 
+    var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
+    var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
+    if(offset.startOffset === offset.endOffset) 
+            return null;
     existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
     
-    if(existingHighlightId){
-     
-      var highlightStart = nodeFinder.getFirstNode(existingHighlightId, highlightId);
+    if(existingHighlightId){ 
+      var highlightStart = nodeFinder.getFirstNode(containerSelector, existingHighlightId, highlightId);
       var highlightEnd = nodeFinder.getLastNode(existingHighlightId, highlightId);
       var range = createRange(highlightStart, highlightEnd);
 
@@ -260,29 +267,30 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
       relativeTo: containerSelector,
       highlightClass: className
     });
-		var highlightData = {
-			guid: highlightId,
-			commonAncestorPosition: ancestorPosition,
-			startOffset: offset.startOffset,
-			endOffset: offset.endOffset,
-			highlightClass: className
-		};
+
+    var highlightData = {
+            guid: highlightId,
+            commonAncestorPosition: ancestorPosition,
+            startOffset: offset.startOffset,
+            endOffset: offset.endOffset,
+            highlightClass: className
+    };
 
     addHighlight(commonAncestor, highlightData);
 		return highlightData;
-	};
+  };
 
-	var loadHighlights = function(containerSelector, highlights) {
-		for (var i = 0; i < highlights.length; i++) {
-			var commonAncestor = nodeFinder.findNodeByPosition({
-				nodePosition: highlights[i].commonAncestorPosition,
-				content: document.body,
-				relativeTo: containerSelector,
-				highlightClass: highlights[i].highlightClass
-			});
-			addHighlight(commonAncestor, highlights[i]);
-		}
-	};
+    var loadHighlights = function(containerSelector, highlights) {
+        for (var i = 0; i < highlights.length; i++) {
+                var commonAncestor = nodeFinder.findNodeByPosition({
+                        nodePosition: highlights[i].commonAncestorPosition,
+                        content: document.body,
+                        relativeTo: containerSelector,
+                        highlightClass: highlights[i].highlightClass
+                });
+                addHighlight(commonAncestor, highlights[i]);
+        }
+    };
 
 	return {
 		loadHighlights: loadHighlights,
