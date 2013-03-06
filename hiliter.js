@@ -204,7 +204,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     if(!content || !content.innerHTML) return;
     var dataIdentifiers = content.querySelectorAll('[data-identifier]');
     for(i=0;i<dataIdentifiers.length;i++){
-      dataIdentifiers[i].remove('data-identifier');
+      dataIdentifiers[i].removeAttribute('data-identifier');
     }
   };
 
@@ -216,7 +216,6 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     var removeHighlight = function(content, identifier) {
         var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(.*?)(</span>)",'g');
         var strippedContent = content.innerHTML;
-        console.log(strippedContent);
         while(true) {
             var temp = strippedContent.replace(regex, "$3");
                 if(strippedContent === temp) 
