@@ -277,6 +277,13 @@ describe("Highlighter", function() {
                             done();
                     });
 
+                    it("should give the last highlight node as last node when end marker is between two highligth spans of the same highlight", function(done) {
+                            var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor this is the selection </span> <span data-identifier = 'end_2'></span>highlight</div><span data-highlight-id=\"1\" class= 'highlight'>.sit</span> <div>amet, <span><span data-highlight-id=\"1\" class= 'highlight lastHighlight'>consectetur</span><span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+                            var highlightNode = doc.querySelector('.lastHighlight');
+                            var node = Finder.getLastNode(doc,"1","2");
+                            expect(node).to.equal(highlightNode);
+                            done();
+                    });
                     it("should give the selection node as last node between highlight id and selection id.", function(done) {
                             var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this i<span data-identifier = 'end_2'></span>hs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
                             var selectionNode = doc.querySelector('[data-identifier=\"end_2\"]');

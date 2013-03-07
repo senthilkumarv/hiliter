@@ -134,11 +134,22 @@ var Finder = (function() {
       };
 
       var getLastNode = function(content, highlightId, selectionId){
-        var endSelectionNode = content.querySelector("[data-identifier='end_"+ selectionId + "']");
-        if (endSelectionNode.parentNode.getAttribute("data-highlight-id") === highlightId){
-            return endSelectionNode.parentNode;
+        var endNode;
+
+        var nodes = getNodes(content);
+        while((node = nodes.nextNode()) != null){
+           if(node.getAttribute("data-identifier") === "end_"+ selectionId) 
+               endNode = node;
+           if(node.getAttribute("data-highlight-id") === highlightId){
+               endNode = node;
+           }
         }
-        return endSelectionNode; 
+
+        if (endNode.parentNode.getAttribute("data-highlight-id") === highlightId){
+            return endNode.parentNode;
+        }
+        return endNode;
+
       };
 	
 	return {
@@ -201,31 +212,27 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	};
 
   var removeMarkers = function(content){
-    if(!content || !content.innerHTML) return;
-    var dataIdentifiers = content.querySelectorAll('[data-identifier]');
-    for(i=0;i<dataIdentifiers.length;i++){
-      dataIdentifiers[i].removeAttribute('data-identifier');
-    }
+      removeNodes(content, '[data-identifier]');
   };
+
+
+  var removeHighlight = function(content, highlightId){
+      removeNodes(content, '[data-highlight-id="'+highlightId+'"]');
+  }
+
+  var removeNodes = function(content, selector){
+    if(!content || !content.innerHTML) return;
+    var nodes = content.querySelectorAll(selector);
+    for(i=0;i<nodes.length;i++){
+      removeNode(nodes[i]);
+    }
+  }
 
     var wrapSelection = function(range, identifier) {
             marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
             marker.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
     };
 
-    var removeHighlight = function(content, identifier) {
-        var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(.*?)(</span>)",'g');
-        var strippedContent = content.innerHTML;
-        while(true) {
-            var temp = strippedContent.replace(regex, "$3");
-                if(strippedContent === temp) 
-                    break;
-                strippedContent = temp;
-           }
-        content.innerHTML = strippedContent;
-        return strippedContent;
-    };
-    
     var getSelectedHighlight = function() {
             var range = window.getSelection()
                     .getRangeAt(0);
@@ -236,7 +243,7 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
   var createRange = function(startNode, endNode){
     var range = document.createRange();
     range.setStart(startNode, 0);
-    range.setEnd(endNode,0);
+    range.setEndAfter(endNode);
     return range;
   }
 
@@ -262,7 +269,8 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
       offset = rangey.offsetFromContainer(commonAncestor.innerHTML, existingHighlightId);
       if(offset.startOffset === offset.endOffset) 
         return null;
-            highlightId = existingHighlightId;
+      highlightId = existingHighlightId;
+      removeHighlight(content, existingHighlightId);
     }
 
     var ancestorPosition = nodeFinder.findNodePosition({
@@ -284,6 +292,18 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 		return highlightData;
   };
 
+  var removeNode = function(node){
+  
+        var parentNode = node.parentNode;
+        var innerNode;
+
+        while (innerNode = node.firstChild)
+        {
+          parentNode.insertBefore(innerNode, node);
+        }
+        parentNode.removeChild(node);
+  };
+
     var loadHighlights = function(containerSelector, highlights) {
         for (var i = 0; i < highlights.length; i++) {
                 var commonAncestor = nodeFinder.findNodeByPosition({
@@ -299,11 +319,10 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
 	return {
 		loadHighlights: loadHighlights,
 		highlight: highlight,
-    getExistingHighlight:getExistingHighlight,
+                getExistingHighlight:getExistingHighlight,
 		addHighlight: addHighlight,
 		highlightTagWithId: highlightTagWithId,
 		removeHighlight: removeHighlight,
-
 		getSelectedHighlight: getSelectedHighlight
 	};
 };
