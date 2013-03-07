@@ -233,13 +233,6 @@ describe("Highlighter", function () {
       done();
     });
 
-    it("should remove highlights with given identifier even when they are nested ", function (done) {
-      var doc = $('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">Wo<span data-highlight-id=\"1\" class=\"highlight\">rl</span>d</span>. Some more text here.</div>')[0];
-      Hiliter.removeHighlight(doc, 1);
-      expect(doc.innerHTML)
-          .to.equal("Hello World. Some more text here.");
-      done();
-    });
   });
 
   describe("load highlight", function () {

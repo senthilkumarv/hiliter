@@ -270,9 +270,10 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     var $allHighlightSpans = $document.querySelectorAll('span[data-highlight-id="' + identifier + '"]');
     for(var highlightSpan in $allHighlightSpans) {
       $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
+      console.log($allHighlightSpans[highlightSpan].outerHTML);
+      console.log($allHighlightSpans[highlightSpan].innerHTML);
     }
   };
-
 
   var removeNodes = function (content, selector) {
     if (!content || !content.innerHTML) return;
@@ -358,7 +359,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
 
   var loadHighlights = function (containerSelector, highlights, $window, $document) {
     marker = marker || new Marker($document);
-    nodeFinder = nodeFinder(marker,$document) || new Finder($document);
+    nodeFinder = nodeFinder || new Finder($document);
     for (var i = 0; i < highlights.length; i++) {
       var commonAncestor = nodeFinder.findNodeByPosition({
         nodePosition:highlights[i].commonAncestorPosition,
@@ -411,7 +412,6 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     isHighlighted:isHighlighted,
     highlightsInSelectionRange: highlightsInSelectionRange,
     reset:reset
-
   };
 };
 var Hiliter = new HiliterCls(Rangey);
