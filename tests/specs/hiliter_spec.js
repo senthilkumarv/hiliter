@@ -311,6 +311,7 @@ describe("Highlighter", function () {
       done();
     });
     describe("highlight and selection nodes", function () {
+
       it("should give the highlight node as first node between highlight id and selection id.", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div><span data-identifier = \"start_2\"></span>this is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var highlightNode = doc.querySelector('[data-highlight-id=\"1\"]');
@@ -342,6 +343,7 @@ describe("Highlighter", function () {
         expect(node).to.equal(highlightNode);
         done();
       });
+
       it("should give the selection node as last node between highlight id and selection id.", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this i<span data-identifier = 'end_2'></span>hs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var selectionNode = doc.querySelector('[data-identifier=\"end_2\"]');
@@ -349,6 +351,35 @@ describe("Highlighter", function () {
         expect(node).to.equal(selectionNode);
         done();
       });
+    });
+
+    describe("selection in highlight", function(){
+
+      it("should return true if selection start is in highlight", function(){
+        var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this i<span data-identifier = 'end_2'></span>hs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+        expect(Finder.isSelectionStartInHighlight(doc, "1", "2")).to.equal(true);
+      });
+
+      it("should return false if selection start is not in highlight", function(){
+        var doc = $("<div><div id=\"root\"><div>Lorem <span data-identifier=\"start_1\" class= 'highlight'></span>ipsum dolor</div><span data-highlight-id = \"2\"></span>this is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+        expect(Finder.isSelectionStartInHighlight(doc, "2", "1")).to.equal(false);
+      });
+
+      it("should return true if selection end is in highlight", function(){
+        var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div><span data-identifier = 'end_2'></span>this ihs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+        expect(Finder.isSelectionEndInHighlight(doc, "1", "2")).to.equal(true);
+      });
+
+      it("should return false if selection end is not in highlight and is in a different node", function(){
+        var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this <span data-identifier = 'end_2'></span>is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
+        expect(Finder.isSelectionEndInHighlight(doc, "1", "2")).to.equal(false);
+      });
+
+      it("should return false if selection end is not in highlight and is in the same node", function(){
+        var doc = $("<div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span>123</span>selected<span data-identifier = 'end_2'></span></div></div>")[0];
+        expect(Finder.isSelectionEndInHighlight(doc, "1", "2")).to.equal(false);
+      });
+
     });
 
     it("should find non highlight parent", function (done) {

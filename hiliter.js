@@ -152,12 +152,43 @@ var Finder = (function () {
 
   };
 
+  var isSelectionStartInHighlight = function(content, highlightId, selectionId) {
+    var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
+    while ((node = nodes.nextNode()) != null) {
+      if(node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) return true; 
+      if(node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) break;
+    }
+    
+    while ((node = nodes.nextNode()) != null){
+      
+      if(node.nodeType === Node.TEXT_NODE) return false;
+      if(node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) return true; 
+    }
+    return true;
+  };
+
+  var isSelectionEndInHighlight = function(content, highlightId, selectionId) {
+    var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
+    while((node = nodes.nextNode()) != null) {
+      if(node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) break; 
+    }
+    
+    while((node = nodes.nextNode()) != null){
+      if(node.nodeType === Node.TEXT_NODE && 
+         (node.parentNode.getAttribute && node.parentNode.getAttribute("data-highlight-id") !== highlightId)) return false;
+      if(node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) return true; 
+    }
+    return true;
+  };
+
   return {
     findNodePosition:findNodePosition,
     findNodeByPosition:findNodeByPosition,
     findNonHighlightAncestor:findNonHighlightAncestor,
     getFirstNode:getFirstNode,
-    getLastNode:getLastNode
+    getLastNode:getLastNode,
+    isSelectionStartInHighlight:isSelectionStartInHighlight,
+    isSelectionEndInHighlight:isSelectionEndInHighlight
   };
 
 })();
@@ -312,6 +343,19 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     }
   };
 
+  var isHighlighted = function(containerSelector, range){
+    var selectionId = new Date().getTime(); 
+    var content = document.querySelector(containerSelector);
+    wrapSelection(range, selectionId);
+    var existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), selectionId);
+    if(!existingHighlightId) return false;
+    
+    var isSelectionInHighlight = nodeFinder.isSelectionStartInHighlight(content, existingHighlightId, selectionId) 
+                                 && nodeFinder.isSelectionEndInHighlight(content, existingHighlightId, selectionId)
+    removeMarkers(content);
+    return isSelectionInHighlight;
+  }
+
   return {
     loadHighlights:loadHighlights,
     highlight:highlight,
@@ -319,7 +363,8 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     addHighlight:addHighlight,
     highlightTagWithId:highlightTagWithId,
     removeHighlight:removeHighlight,
-    getSelectedHighlight:getSelectedHighlight
+    getSelectedHighlight:getSelectedHighlight,
+    isHighlighted:isHighlighted
   };
 };
 
