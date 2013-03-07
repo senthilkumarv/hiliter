@@ -182,7 +182,7 @@ var Finder = function ($document) {
   };
 
   var findHighlights = function(content, selectionId) {
-    var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
+    var nodes = $document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
     var highlights = [];
     var insideCurrentSelection = false;
     var containsHighlight = function(highlightId){
@@ -290,8 +290,8 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     return parent.getAttribute("data-highlight-id");
   };
 
-  var createRange = function (startNode, endNode) {
-    var range = document.createRange();
+  var createRange = function (startNode, endNode, $document) {
+    var range = $document.createRange();
     range.setStart(startNode, 0);
     range.setEndAfter(endNode);
     return range;
@@ -303,7 +303,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     var range = $window.getSelection().getRangeAt(0);
     var highlightId = (highlightId) ? highlightId : (new Date().getTime());
 
-    wrapSelection(range, highlightId);
+    wrapSelection(range, highlightId, $document);
     existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), highlightId);
 
     if (existingHighlightId) {
@@ -311,8 +311,8 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
       var highlightStart = nodeFinder.getFirstNode(content, existingHighlightId, highlightId);
       var highlightEnd = nodeFinder.getLastNode(content, existingHighlightId, highlightId);
 
-      range = createRange(highlightStart, highlightEnd);
-      wrapSelection(range, existingHighlightId);
+      range = createRange(highlightStart, highlightEnd, $document);
+      wrapSelection(range, existingHighlightId, $document);
       highlightId = existingHighlightId;
       removeHighlight(content, existingHighlightId);
     }
@@ -371,7 +371,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     nodeFinder = nodeFinder || new Finder($document);
     var selectionId = new Date().getTime(); 
     var content = $document.querySelector(containerSelector);
-    wrapSelection(range, selectionId);
+    wrapSelection(range, selectionId, $document);
     var existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), selectionId);
     if(!existingHighlightId) return false;
 
@@ -385,7 +385,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     nodeFinder = nodeFinder || new Finder($document);
     var selectionId = new Date().getTime(); 
     var content = $document.querySelector(containerSelector);
-    wrapSelection(range, selectionId);
+    wrapSelection(range, selectionId, $document);
     var numberOfHighlights = nodeFinder.findHighlights(content, selectionId);
     removeMarkers(content);
     return numberOfHighlights;
