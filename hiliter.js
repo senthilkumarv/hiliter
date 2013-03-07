@@ -252,26 +252,23 @@ var HiliterCls = function(rangey, marker, nodeFinder) {
     var highlightId = (highlightId) ? highlightId : (new Date().getTime());
     
     wrapSelection(range, highlightId); 
-    var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
-    var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
-    if(offset.startOffset === offset.endOffset) 
-            return null;
-    existingHighlightId = getExistingHighlight(commonAncestor, highlightId);
+    existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), highlightId);
     
     if(existingHighlightId){ 
       var content = document.querySelector(containerSelector);
       var highlightStart = nodeFinder.getFirstNode(content, existingHighlightId, highlightId);
       var highlightEnd = nodeFinder.getLastNode(content, existingHighlightId, highlightId);
-      var range = createRange(highlightStart, highlightEnd);
 
+      range = createRange(highlightStart, highlightEnd);
       wrapSelection(range, existingHighlightId); 
-      commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
-      offset = rangey.offsetFromContainer(commonAncestor.innerHTML, existingHighlightId);
-      if(offset.startOffset === offset.endOffset) 
-        return null;
       highlightId = existingHighlightId;
       removeHighlight(content, existingHighlightId);
     }
+
+    var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
+    var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
+    if(offset.startOffset === offset.endOffset) 
+        return null;
 
     var ancestorPosition = nodeFinder.findNodePosition({
       nodeToFind: commonAncestor,
