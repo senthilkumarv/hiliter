@@ -4,9 +4,17 @@ describe("Highlighter", function () {
     done();
   });
   describe("Add Highlight", function () {
+
+    var hiliter;
+    beforeEach(function(done){
+      
+      hiliter = new HiliterCls(Rangey, new Marker(document), new Finder(document));
+      done();
+    });
+
     it("should remove highlight tags with no text in them", function (done) {
       var doc = "<div>The quick brown fox <span class=\"highlight\" data-highlight-id=\"1\"></span><span data-highlight-id=\"1\" class=\"highlight\"></span><span data-highlight-id=\"1\" class=\"highlight\">jumps over the lazy</span> dog.</div>";
-      var sanitized_markups = Marker.sanitize(doc, "1");
+      var sanitized_markups = new Marker(document).sanitize(doc, "1");
       expect(sanitized_markups)
           .to.equal("<div>The quick brown fox <span data-highlight-id=\"1\" class=\"highlight\">jumps over the lazy</span> dog.</div>");
       done();
@@ -14,7 +22,7 @@ describe("Highlighter", function () {
 
     it("should add the highlight tag for the give text range", function (done) {
       var doc = $("<div>Hello World. Some more text here.</div>")[0];
-      Hiliter.addHighlight(doc, {
+      hiliter.addHighlight(doc, {
         guid:1,
         startOffset:7,
         endOffset:12,
@@ -28,7 +36,7 @@ describe("Highlighter", function () {
 
     it("should not add empty highlight spans for nested tags", function (done) {
       var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
-      Hiliter.addHighlight(doc, {
+      hiliter.addHighlight(doc, {
         guid:1,
         startOffset:2,
         endOffset:23,
@@ -41,7 +49,7 @@ describe("Highlighter", function () {
 
     it("should add highlight for nested tags", function (done) {
       var doc = $("<div><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
-      Hiliter.addHighlight(doc, {
+      hiliter.addHighlight(doc, {
         guid:1,
         startOffset:2,
         endOffset:23,
@@ -53,7 +61,7 @@ describe("Highlighter", function () {
     });
 
     it("should create highlight tag given id and class name", function (done) {
-      var result = Hiliter.highlightTagWithId(1, "someClass");
+      var result = hiliter.highlightTagWithId(1, "someClass");
       expect(result).
           to.equal("<span data-highlight-id=\"1\" class=\"someClass\">");
       done();
@@ -105,7 +113,7 @@ describe("Highlighter", function () {
   });
 
   describe("highlight", function () {
-    var mockMarker, mockRangey, mockFinder, hiliter;
+    var mockMarker, mockRangey, mockFinder, hiliter, mockWindow;
     beforeEach(function (done) {
       mockMarker = { setStartMarkerAt:function () {
       }, setEndMarkerAt:function () {
@@ -124,7 +132,8 @@ describe("Highlighter", function () {
           return 0;
         } };
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
-      window.getSelection = function () {
+      mockWindow = {};
+      mockWindow.getSelection = function () {
         return { getRangeAt:function () {
           return {};
         } }
@@ -155,7 +164,7 @@ describe("Highlighter", function () {
 
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
 
-      highlightData = hiliter.highlight("#content", "highlight", "555");
+      highlightData = hiliter.highlight("#content", "highlight", mockWindow, document, "555");
       expect(highlightData.guid).to.equal("111");
       done();
     });
@@ -181,7 +190,7 @@ describe("Highlighter", function () {
 
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
 
-      highlightData = hiliter.highlight("#content", "highlight", "555");
+      highlightData = hiliter.highlight("#content", "highlight", mockWindow, document, "555");
       expect(highlightData.guid).to.equal("111");
       expect(highlightData.startOffset).to.equal(1);
       expect(highlightData.endOffset).to.equal(3);
@@ -190,7 +199,7 @@ describe("Highlighter", function () {
     });
 
     it("should not add highlight when start and end text offsets are same", function (done) {
-      var result = hiliter.highlight("", "", "");
+      var result = hiliter.highlight("", "", mockWindow, document, "");
       expect(result).to.equal(null);
       done();
     });
@@ -199,7 +208,7 @@ describe("Highlighter", function () {
       mockRangey.offsetFromContainer = function () {
         return { startOffset:1, endOffset:2};
       }
-      var result = hiliter.highlight("", "", "");
+      var result = hiliter.highlight("", "", mockWindow, document, "");
       expect(result.commonAncestorPosition).to.equal(0);
       expect(result.startOffset).to.equal(1);
       expect(result.endOffset).to.equal(2);
@@ -234,7 +243,7 @@ describe("Highlighter", function () {
   });
 
   describe("load highlight", function () {
-    var mockMarker, mockRangey, mockFinder, hiliter, findNodeByPositionStub;
+    var mockMarker, mockRangey, mockFinder, hiliter, findNodeByPositionStub, mockWindow;
     beforeEach(function (done) {
       findNodeByPositionStub = sinon.mock().returns($("#content")[0]);
       mockMarker = { setStartMarkerAt:function () {
@@ -253,7 +262,8 @@ describe("Highlighter", function () {
         return 0;
       }, findNodeByPosition:findNodeByPositionStub};
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
-      window.getSelection = function () {
+      mockWindow = {};
+      mockWindow.getSelection = function () {
         return { getRangeAt:function () {
           return {};
         } }
@@ -267,7 +277,8 @@ describe("Highlighter", function () {
       hiliter.loadHighlights("#content", [
         {commonAncestorPosition:0, startOffset:1, endOffset:5},
         {commonAncestorPosition:0, startOffset:7, endOffset:12}
-      ]);
+      ],
+      mockWindow, document);
       findNodeByPositionStub.verify();
       done();
     });
@@ -276,7 +287,7 @@ describe("Highlighter", function () {
     it("should find the position relative to give root", function (done) {
       var doc = $("<div><div id=\"root\"><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
       var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
-      var nodePosition = Finder.findNodePosition({
+      var nodePosition = new Finder(document).findNodePosition({
         nodeToFind:nodeToFind,
         content:doc,
         relativeTo:"#root",
@@ -288,26 +299,24 @@ describe("Highlighter", function () {
     it("should skip the highlight element", function (done) {
       var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
       var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
-      var nodePosition = Finder.findNodePosition({
+      var nodePosition = new Finder(document).findNodePosition({
         nodeToFind:nodeToFind,
         content:doc,
         relativeTo:"#root",
       });
-      expect(nodePosition)
-          .to.equal(3);
+      expect(nodePosition).to.equal(3);
       done();
     });
     it("should give the node given the node position", function (done) {
       var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
       var nodePosition = 4;
       var nodeToFind = doc.querySelector('#root>div:nth-child(2)');
-      var node = Finder.findNodeByPosition({
+      var node = new Finder(document).findNodeByPosition({
         nodePosition:nodePosition,
         content:doc,
         relativeTo:"#root",
       });
-      expect(node)
-          .to.equal(nodeToFind);
+      expect(node).to.equal(nodeToFind);
       done();
     });
     describe("highlight and selection nodes", function () {
@@ -315,7 +324,7 @@ describe("Highlighter", function () {
       it("should give the highlight node as first node between highlight id and selection id.", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum </span>dolor</div><span data-identifier = \"start_2\"></span>this is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var highlightNode = doc.querySelector('[data-highlight-id=\"1\"]');
-        var node = Finder.getFirstNode(doc, "1", "2");
+        var node = new Finder(document).getFirstNode(doc, "1", "2");
         expect(node).to.equal(highlightNode);
         done();
       });
@@ -323,7 +332,7 @@ describe("Highlighter", function () {
       it("should give the selection node as first node between highlight id and selection id.", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-identifier=\"start_1\" class= 'highlight'>ipsum </span>dolor</div><span data-highlight-id = \"2\"></span>this is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var selectionNode = doc.querySelector('[data-identifier=\"start_1\"]');
-        var node = Finder.getFirstNode(doc, "2", "1");
+        var node = new Finder(document).getFirstNode(doc, "2", "1");
         expect(node).to.equal(selectionNode);
         done();
       });
@@ -331,7 +340,7 @@ describe("Highlighter", function () {
       it("should give the highlight node as last node between highlight id and selection id.", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor this is the selection <span data-identifier = 'end_2'></span>highlight</div></span> .sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var highlightNode = doc.querySelector('[data-highlight-id=\"1\"]');
-        var node = Finder.getLastNode(doc, "1", "2");
+        var node = new Finder(document).getLastNode(doc, "1", "2");
         expect(node).to.equal(highlightNode);
         done();
       });
@@ -339,7 +348,7 @@ describe("Highlighter", function () {
       it("should give the last highlight node as last node when end marker is between two highligth spans of the same highlight", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor this is the selection </span> <span data-identifier = 'end_2'></span>highlight</div><span data-highlight-id=\"1\" class= 'highlight'>.sit</span> <div>amet, <span><span data-highlight-id=\"1\" class= 'highlight lastHighlight'>consectetur</span><span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var highlightNode = doc.querySelector('.lastHighlight');
-        var node = Finder.getLastNode(doc, "1", "2");
+        var node = new Finder(document).getLastNode(doc, "1", "2");
         expect(node).to.equal(highlightNode);
         done();
       });
@@ -347,7 +356,7 @@ describe("Highlighter", function () {
       it("should give the selection node as last node between highlight id and selection id.", function (done) {
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this i<span data-identifier = 'end_2'></span>hs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
         var selectionNode = doc.querySelector('[data-identifier=\"end_2\"]');
-        var node = Finder.getLastNode(doc, "1", "2");
+        var node = new Finder(document).getLastNode(doc, "1", "2");
         expect(node).to.equal(selectionNode);
         done();
       });
@@ -357,27 +366,27 @@ describe("Highlighter", function () {
 
       it("should return true if selection start is in highlight", function(){
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this i<span data-identifier = 'end_2'></span>hs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
-        expect(Finder.isSelectionStartInHighlight(doc, "1", "2")).to.equal(true);
+        expect(new Finder(document).isSelectionStartInHighlight(doc, "1", "2")).to.equal(true);
       });
 
       it("should return false if selection start is not in highlight", function(){
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-identifier=\"start_1\" class= 'highlight'></span>ipsum dolor</div><span data-highlight-id = \"2\"></span>this is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
-        expect(Finder.isSelectionStartInHighlight(doc, "2", "1")).to.equal(false);
+        expect(new Finder(document).isSelectionStartInHighlight(doc, "2", "1")).to.equal(false);
       });
 
       it("should return true if selection end is in highlight", function(){
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div><span data-identifier = 'end_2'></span>this ihs the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
-        expect(Finder.isSelectionEndInHighlight(doc, "1", "2")).to.equal(true);
+        expect(new Finder(document).isSelectionEndInHighlight(doc, "1", "2")).to.equal(true);
       });
 
       it("should return false if selection end is not in highlight and is in a different node", function(){
         var doc = $("<div><div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span></span></div>this <span data-identifier = 'end_2'></span>is the selection highlight.sit <div>amet, <span>consectetur<span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div><div>")[0];
-        expect(Finder.isSelectionEndInHighlight(doc, "1", "2")).to.equal(false);
+        expect(new Finder(document).isSelectionEndInHighlight(doc, "1", "2")).to.equal(false);
       });
 
       it("should return false if selection end is not in highlight and is in the same node", function(){
         var doc = $("<div id=\"root\"><div>Lorem <span data-highlight-id=\"1\" class= 'highlight'>ipsum dolor<span data-identifier = \"start_2\"></span>123</span>selected<span data-identifier = 'end_2'></span></div></div>")[0];
-        expect(Finder.isSelectionEndInHighlight(doc, "1", "2")).to.equal(false);
+        expect(new Finder(document).isSelectionEndInHighlight(doc, "1", "2")).to.equal(false);
       });
 
     });
@@ -385,22 +394,22 @@ describe("Highlighter", function () {
     describe("number of highlights in selection", function() {
       it("should return the number of highlights in selection", function(done) {
         var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
-        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        expect(new Finder(document).findHighlights(doc, 1)).to.eql(['1', '2']); 
         done();       
       });
       it("should not return duplicate highlight ids", function(done) {
         var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has</span> <span data-highlight-id="2" class="highlight">the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
-        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        expect(new Finder(document).findHighlights(doc, 1)).to.eql(['1', '2']); 
         done();       
       });
       it("should not include highlights that are before the start of selection", function(done) {
         var doc = $('<div><div id="root"><div><span data-highlight-id="3" class="highlight">Lorem </span><span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
-        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        expect(new Finder(document).findHighlights(doc, 1)).to.eql(['1', '2']); 
         done();       
       });      
       it("should not include highlights that are after the start of selection", function(done) {
         var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span><span data-highlight-id="4" class="highlight">lorem</span></div></div></div>')[0];
-        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        expect(new Finder(document).findHighlights(doc, 1)).to.eql(['1', '2']); 
         done();       
       });      
 
@@ -408,7 +417,7 @@ describe("Highlighter", function () {
 
     it("should find non highlight parent", function (done) {
       $("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
-      var parent = Finder.findNonHighlightAncestor(document.getElementById("highlight1").childNodes[0]);
+      var parent = new Finder(document).findNonHighlightAncestor(document.getElementById("highlight1").childNodes[0]);
       expect(parent).to.equal(document.getElementById("content"));
       done();
     });
@@ -449,13 +458,13 @@ describe("Highlighter", function () {
   describe("Marker", function () {
     it("should set start marker at given offset", function (done) {
       $("#content").html("Set Markers");
-      Marker.setStartMarkerAt("123", document.getElementById("content"), 0, 0);
+      new Marker(document).setStartMarkerAt("123", document.getElementById("content"), 0, 0);
       expect($("#content").html()).to.equal("<span data-identifier=\"start_123\"></span>Set Markers");
       done();
     });
     it("should set end marker at given offset", function (done) {
       $("#content").html("Set Markers");
-      Marker.setEndMarkerAt("123", document.getElementById("content"), 0, 0);
+      new Marker(document).setEndMarkerAt("123", document.getElementById("content"), 0, 0);
       expect($("#content").html()).to.equal("<span data-identifier=\"end_123\"></span>Set Markers");
       done();
     });
