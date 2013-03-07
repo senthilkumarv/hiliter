@@ -181,6 +181,25 @@ var Finder = (function () {
     return true;
   };
 
+  var findHighlights = function(content, selectionId) {
+    var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
+    var highlights = [];
+    var insideCurrentSelection = false;
+    var containsHighlight = function(highlightId){
+      for(var i=0;i<highlights.length ; i++){
+        if(highlights[i] === highlightId) return true;
+      }
+      return false;
+    };
+    while ((node = nodes.nextNode()) != null) {
+      if(node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) insideCurrentSelection = true;
+      if(insideCurrentSelection && node.getAttribute && node.getAttribute("data-highlight-id") && !containsHighlight(node.getAttribute("data-highlight-id"))) 
+          highlights.push(node.getAttribute("data-highlight-id")); 
+      if(node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) break;      
+    };
+    return highlights;
+  };
+
   return {
     findNodePosition:findNodePosition,
     findNodeByPosition:findNodeByPosition,
@@ -188,7 +207,8 @@ var Finder = (function () {
     getFirstNode:getFirstNode,
     getLastNode:getLastNode,
     isSelectionStartInHighlight:isSelectionStartInHighlight,
-    isSelectionEndInHighlight:isSelectionEndInHighlight
+    isSelectionEndInHighlight:isSelectionEndInHighlight,
+    findHighlights: findHighlights
   };
 
 })();
@@ -356,6 +376,15 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     return isSelectionInHighlight;
   }
 
+  var highlightsInSelectionRange = function(containerSelector, range){
+    var selectionId = new Date().getTime(); 
+    var content = document.querySelector(containerSelector);
+    wrapSelection(range, selectionId);
+    var numberOfHighlights = nodeFinder.findHighlights(content, selectionId);
+    removeMarkers(content);
+    return numberOfHighlights;
+  };
+
   return {
     loadHighlights:loadHighlights,
     highlight:highlight,
@@ -364,7 +393,8 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     highlightTagWithId:highlightTagWithId,
     removeHighlight:removeHighlight,
     getSelectedHighlight:getSelectedHighlight,
-    isHighlighted:isHighlighted
+    isHighlighted:isHighlighted,
+    highlightsInSelectionRange: highlightsInSelectionRange
   };
 };
 

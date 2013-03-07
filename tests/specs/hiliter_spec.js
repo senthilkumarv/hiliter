@@ -382,6 +382,30 @@ describe("Highlighter", function () {
 
     });
 
+    describe("number of highlights in selection", function() {
+      it("should return the number of highlights in selection", function(done) {
+        var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
+        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        done();       
+      });
+      it("should not return duplicate highlight ids", function(done) {
+        var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has</span> <span data-highlight-id="2" class="highlight">the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
+        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        done();       
+      });
+      it("should not include highlights that are before the start of selection", function(done) {
+        var doc = $('<div><div id="root"><div><span data-highlight-id="3" class="highlight">Lorem </span><span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
+        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        done();       
+      });      
+      it("should not include highlights that are after the start of selection", function(done) {
+        var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span><span data-highlight-id="4" class="highlight">lorem</span></div></div></div>')[0];
+        expect(Finder.findHighlights(doc, 1)).to.eql(['1', '2']); 
+        done();       
+      });      
+
+    });
+
     it("should find non highlight parent", function (done) {
       $("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
       var parent = Finder.findNonHighlightAncestor(document.getElementById("highlight1").childNodes[0]);
