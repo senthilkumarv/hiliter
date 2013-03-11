@@ -15,8 +15,8 @@ var Rangey = (function () {
   };
 
   var offsetFromContainer = function (content, identifier) {
-    var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"")
-    var endOffset = content.indexOf("<span data-identifier=\"end_" + identifier + "\"")
+    var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"");
+    var endOffset = content.indexOf("<span data-identifier=\"end_" + identifier + "\"");
     endOffset = content.indexOf("</span>", endOffset);
     return {
       startOffset:calculateOffsetTill(content, startOffset),
@@ -87,14 +87,14 @@ var Marker = function ($document) {
 
 var Finder = function ($document) {
   var filter = function (node) {
-    if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") == null) return NodeFilter.FILTER_ACCEPT;
+    if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") === null) return NodeFilter.FILTER_ACCEPT;
     return NodeFilter.FILTER_SKIP;
   };
 
   var findNodePosition = function (data) {
     var node, index = 0;
     var nodes = $document.createNodeIterator(data.content.querySelector(data.relativeTo), NodeFilter.SHOW_ELEMENT, filter, false);
-    while ((node = nodes.nextNode()) != null) {
+    while ((node = nodes.nextNode()) !== null) {
       index++;
       if (node == data.nodeToFind) break;
     }
@@ -106,7 +106,7 @@ var Finder = function ($document) {
 
     var relativeTo = $document.querySelector(data.relativeTo);
     var nodes = getNodes(relativeTo || data.content, filter);
-    while ((node = nodes.nextNode()) != null) {
+    while ((node = nodes.nextNode()) !== null) {
       index++;
       if (index == data.nodePosition) return node;
     }
@@ -114,7 +114,7 @@ var Finder = function ($document) {
 
   var getNodes = function (content, filter) {
     return $document.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, filter, false);
-  }
+  };
 
   var findNonHighlightAncestor = function (commonAncestor) {
     while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
@@ -125,9 +125,8 @@ var Finder = function ($document) {
 
   var getFirstNode = function (content, highlightId, selectionId) {
     var nodes = getNodes(content);
-    while ((node = nodes.nextNode()) != null) {
-      if (node.getAttribute("data-identifier") === "start_" + selectionId
-          || node.getAttribute("data-highlight-id") === highlightId) {
+    while ((node = nodes.nextNode()) !== null) {
+      if (node.getAttribute("data-identifier") === "start_" + selectionId || node.getAttribute("data-highlight-id") === highlightId) {
         return node;
       }
     }
@@ -137,7 +136,7 @@ var Finder = function ($document) {
     var endNode;
 
     var nodes = getNodes(content);
-    while ((node = nodes.nextNode()) != null) {
+    while ((node = nodes.nextNode()) !== null) {
       if (node.getAttribute("data-identifier") === "end_" + selectionId)
         endNode = node;
       if (node.getAttribute("data-highlight-id") === highlightId) {
@@ -154,12 +153,12 @@ var Finder = function ($document) {
 
   var isSelectionStartInHighlight = function(content, highlightId, selectionId) {
     var nodes = $document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
-    while ((node = nodes.nextNode()) != null) {
+    while ((node = nodes.nextNode()) !== null) {
       if(node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) return true; 
       if(node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) break;
     }
     
-    while ((node = nodes.nextNode()) != null){
+    while ((node = nodes.nextNode()) !== null){
       
       if(node.nodeType === Node.TEXT_NODE) return false;
       if(node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) return true; 
@@ -169,11 +168,11 @@ var Finder = function ($document) {
 
   var isSelectionEndInHighlight = function(content, highlightId, selectionId) {
     var nodes = $document.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
-    while((node = nodes.nextNode()) != null) {
+    while((node = nodes.nextNode()) !== null) {
       if(node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) break; 
     }
     
-    while((node = nodes.nextNode()) != null){
+    while((node = nodes.nextNode()) !== null){
       if(node.nodeType === Node.TEXT_NODE && 
          (node.parentNode.getAttribute && node.parentNode.getAttribute("data-highlight-id") !== highlightId)) return false;
       if(node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) return true; 
@@ -191,12 +190,12 @@ var Finder = function ($document) {
       }
       return false;
     };
-    while ((node = nodes.nextNode()) != null) {
+    while ((node = nodes.nextNode()) !== null) {
       if(node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) insideCurrentSelection = true;
       if(insideCurrentSelection && node.getAttribute && node.getAttribute("data-highlight-id") && !containsHighlight(node.getAttribute("data-highlight-id"))) 
           highlights.push(node.getAttribute("data-highlight-id")); 
       if(node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) break;      
-    };
+    }
     return highlights;
   };
 
@@ -221,10 +220,11 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
   var getExistingHighlight = function (content, markerId) {
     if (!content || !content.innerHTML) return;
     var node;
+    var highlightAttributeId;
     var nodes = document.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
     while ((node = nodes.nextNode()) !== null) {
       if (node.getAttribute("data-identifier") === "start_" + markerId) {
-        var highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
+        highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
         if (highlightAttributeId) {
           return highlightAttributeId;
         }
@@ -233,7 +233,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     }
 
     while ((node = nodes.nextNode()) !== null) {
-      var highlightAttributeId = node.getAttribute("data-highlight-id");
+      highlightAttributeId = node.getAttribute("data-highlight-id");
       if (highlightAttributeId) {
         return highlightAttributeId;
       }
@@ -242,7 +242,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
       }
     }
     return;
-  }
+  };
 
   var addHighlight = function (content, highlight) {
     var nodeContent = content.innerHTML;
@@ -270,8 +270,13 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     var $allHighlightSpans = $document.querySelectorAll('span[data-highlight-id="' + identifier + '"]');
     for(var highlightSpan in $allHighlightSpans) {
       $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
-      console.log($allHighlightSpans[highlightSpan].outerHTML);
-      console.log($allHighlightSpans[highlightSpan].innerHTML);
+    }
+  };
+
+  var clearAllHighlights = function($document){
+    var $allHighlightSpans = $document.querySelectorAll('span[data-highlight-id]');
+    for(var highlightSpan in $allHighlightSpans) {
+      $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
     }
   };
 
@@ -281,7 +286,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     for (i = 0; i < nodes.length; i++) {
       removeNode(nodes[i]);
     }
-  }
+  };
 
   var wrapSelection = function (range, identifier) {
     marker.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
@@ -300,16 +305,15 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     range.setStart(startNode, 0);
     range.setEndAfter(endNode);
     return range;
-  }
+  };
 
-  var highlight = function (containerSelector, className, $window, $document, highlightId) {
+  var highlight = function (containerSelector, className, range, $window, $document, highlightId) {
     marker = marker || new Marker($document);
     nodeFinder = nodeFinder || new Finder($document);
-    var range = $window.getSelection().getRangeAt(0);
-    var highlightId = (highlightId) ? highlightId : (new Date().getTime());
+    highlightId = (highlightId) ? highlightId : (new Date().getTime());
 
-    wrapSelection(range, highlightId, $document);
-    existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), highlightId);
+    wrapSelection(range, highlightId);
+    var existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), highlightId);
 
     if (existingHighlightId) {
       var content = $document.querySelector(containerSelector);
@@ -376,21 +380,22 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     nodeFinder = nodeFinder || new Finder($document);
     var selectionId = new Date().getTime(); 
     var content = $document.querySelector(containerSelector);
-    wrapSelection(range, selectionId, $document);
+    wrapSelection(range, selectionId);
     var existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), selectionId);
     if(!existingHighlightId) return false;
 
-    var isSelectionInHighlight = nodeFinder.isSelectionStartInHighlight(content, existingHighlightId, selectionId) 
-    && nodeFinder.isSelectionEndInHighlight(content, existingHighlightId, selectionId)
+    var isSelectionInHighlight = nodeFinder.isSelectionStartInHighlight(content, existingHighlightId, selectionId) && 
+                                nodeFinder.isSelectionEndInHighlight(content, existingHighlightId, selectionId);
     removeMarkers(content);
     return isSelectionInHighlight;
   }
 
   var highlightsInSelectionRange = function(containerSelector, range, $document){
+    marker = marker || new Marker($document);
     nodeFinder = nodeFinder || new Finder($document);
     var selectionId = new Date().getTime(); 
     var content = $document.querySelector(containerSelector);
-    wrapSelection(range, selectionId, $document);
+    wrapSelection(range, selectionId);
     var numberOfHighlights = nodeFinder.findHighlights(content, selectionId);
     removeMarkers(content);
     return numberOfHighlights;
@@ -408,6 +413,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     addHighlight:addHighlight,
     highlightTagWithId:highlightTagWithId,
     removeHighlight:removeHighlight,
+    clearAllHighlights:clearAllHighlights,
     getSelectedHighlight:getSelectedHighlight,
     isHighlighted:isHighlighted,
     highlightsInSelectionRange: highlightsInSelectionRange,

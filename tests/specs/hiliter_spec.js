@@ -164,7 +164,7 @@ describe("Highlighter", function () {
 
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
 
-      highlightData = hiliter.highlight("#content", "highlight", mockWindow, document, "555");
+      highlightData = hiliter.highlight("#content", "highlight", {}, mockWindow, document, "555");
       expect(highlightData.guid).to.equal("111");
       done();
     });
@@ -190,7 +190,7 @@ describe("Highlighter", function () {
 
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
 
-      highlightData = hiliter.highlight("#content", "highlight", mockWindow, document, "555");
+      highlightData = hiliter.highlight("#content", "highlight", {}, mockWindow, document, "555");
       expect(highlightData.guid).to.equal("111");
       expect(highlightData.startOffset).to.equal(1);
       expect(highlightData.endOffset).to.equal(3);
