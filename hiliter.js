@@ -191,7 +191,12 @@ var Finder = function ($document) {
       return false;
     };
     while ((node = nodes.nextNode()) !== null) {
-      if(node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) insideCurrentSelection = true;
+      if(node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) {
+        insideCurrentSelection = true;
+        var parentHighlightId = node.parentNode.getAttribute && node.parentNode.getAttribute("data-highlight-id");
+        if(parentHighlightId && !containsHighlight(parentHighlightId))    
+            highlights.push(parentHighlightId);
+      }
       if(insideCurrentSelection && node.getAttribute && node.getAttribute("data-highlight-id") && !containsHighlight(node.getAttribute("data-highlight-id"))) 
           highlights.push(node.getAttribute("data-highlight-id")); 
       if(node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) break;      

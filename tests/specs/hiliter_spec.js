@@ -101,14 +101,14 @@ describe("Highlighter", function () {
     });
 
     it("gets existing highlight if selection start alone is in existing highlight", function () {
-      var doc = $('<div><div id="content"><div>You <span data-highlight-id="4456">can select'
-          + '<span data-identifier="start_555"></span> some random</span>'
-          + ' text <span data-identifier="end_555"></span> in this page</div></div></div>')[0];
+      var doc = $('<div><div id="content"><div>You <span data-highlight-id="4456">can select' +
+           '<span data-identifier="start_555"></span> some random</span>' +
+          ' text <span data-identifier="end_555"></span> in this page</div></div></div>')[0];
 
       existingHighlightId = Hiliter.getExistingHighlight(doc, "555");
       expect(existingHighlightId).to.equal("4456");
 
-    })
+    });
 
   });
 
@@ -136,7 +136,7 @@ describe("Highlighter", function () {
       mockWindow.getSelection = function () {
         return { getRangeAt:function () {
           return {};
-        } }
+        } };
       };
       done();
     });
@@ -207,7 +207,7 @@ describe("Highlighter", function () {
     it("should return highlight obj when start and end text offsets are not same", function (done) {
       mockRangey.offsetFromContainer = function () {
         return { startOffset:1, endOffset:2};
-      }
+      };
       var result = hiliter.highlight("", "", mockWindow, document, "");
       expect(result.commonAncestorPosition).to.equal(0);
       expect(result.startOffset).to.equal(1);
@@ -259,13 +259,12 @@ describe("Highlighter", function () {
       mockWindow.getSelection = function () {
         return { getRangeAt:function () {
           return {};
-        } }
+        } };
       };
       done();
     });
     it("should load highlights from given list", function (done) {
       var doc = $("#content").html("<div>Hello World. Some more text here.</div>");
-      ;
       findNodeByPositionStub.twice();
       hiliter.loadHighlights("#content", [
         {commonAncestorPosition:0, startOffset:1, endOffset:5},
@@ -283,7 +282,7 @@ describe("Highlighter", function () {
       var nodePosition = new Finder(document).findNodePosition({
         nodeToFind:nodeToFind,
         content:doc,
-        relativeTo:"#root",
+        relativeTo:"#root"
       });
       expect(nodePosition)
           .to.equal(3);
@@ -295,7 +294,7 @@ describe("Highlighter", function () {
       var nodePosition = new Finder(document).findNodePosition({
         nodeToFind:nodeToFind,
         content:doc,
-        relativeTo:"#root",
+        relativeTo:"#root"
       });
       expect(nodePosition).to.equal(3);
       done();
@@ -307,7 +306,7 @@ describe("Highlighter", function () {
       var node = new Finder(document).findNodeByPosition({
         nodePosition:nodePosition,
         content:doc,
-        relativeTo:"#root",
+        relativeTo:"#root"
       });
       expect(node).to.equal(nodeToFind);
       done();
@@ -387,6 +386,11 @@ describe("Highlighter", function () {
     describe("number of highlights in selection", function() {
       it("should return the number of highlights in selection", function(done) {
         var doc = $('<div><div id="root"><div>Lorem <span data-identifier="start_1"></span>ipsum<span data-highlight-id="1" class="highlight">ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
+        expect(new Finder(document).findHighlights(doc, 1)).to.eql(['1', '2']); 
+        done();       
+      });
+      it("should include highlight ids within the start of a selection ", function(done) {
+        var doc = $('<div><div id="root"><div><span data-highlight-id="1" class="highlight">Lorem <span data-identifier="start_1"></span>ipsum ipsum dolor</span></div><div>this i<span data-highlight-id="2" class="highlight">has</span> <span data-highlight-id="2" class="highlight">the</span> highlight<span data-identifier="end_1"></span></div></div></div>')[0];
         expect(new Finder(document).findHighlights(doc, 1)).to.eql(['1', '2']); 
         done();       
       });
