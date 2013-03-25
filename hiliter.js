@@ -305,7 +305,18 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     return parent.getAttribute("data-highlight-id");
   };
 
-  var createRange = function (startNode, endNode, $document) {
+  var getMergedRange = function(range, containerSelector, existingHighlightId, $document){
+    marker = marker || new Marker($document);
+    nodeFinder = nodeFinder || new Finder($document);
+    var selectionId = new Date().getTime();
+    wrapSelection(range, selectionId);
+    return createMergedRange($document.querySelector(containerSelector), existingHighlightId, selectionId, $document);
+  };
+
+  var createMergedRange = function (content, existingHighlightId, selectionId, $document) {
+    var startNode = nodeFinder.getFirstNode(content, existingHighlightId, selectionId);
+    var endNode = nodeFinder.getLastNode(content, existingHighlightId, selectionId);
+
     var range = $document.createRange();
     range.setStart(startNode, 0);
     range.setEndAfter(endNode);
@@ -322,10 +333,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
 
     if (existingHighlightId) {
       var content = $document.querySelector(containerSelector);
-      var highlightStart = nodeFinder.getFirstNode(content, existingHighlightId, highlightId);
-      var highlightEnd = nodeFinder.getLastNode(content, existingHighlightId, highlightId);
-
-      range = createRange(highlightStart, highlightEnd, $document);
+      range = createMergedRange(content, existingHighlightId, highlightId, $document);
       wrapSelection(range, existingHighlightId, $document);
       highlightId = existingHighlightId;
       removeHighlight(content, existingHighlightId);
@@ -348,11 +356,21 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
       commonAncestorPosition:ancestorPosition,
       startOffset:offset.startOffset,
       endOffset:offset.endOffset,
-      highlightClass:className
+      highlightClass:className,
+      content:range.toString()
     };
 
     addHighlight(commonAncestor, highlightData);
     return highlightData;
+  };
+  
+  var findExistingHighlight = function(range, $document){
+    marker = marker || new Marker($document);
+    nodeFinder = nodeFinder || new Finder($document);
+    var selectionId = new Date().getTime();
+    wrapSelection(range, selectionId);
+    var highlight = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), selectionId);
+    return highlight;
   };
 
   var removeNode = function (node) {
@@ -393,7 +411,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
                                 nodeFinder.isSelectionEndInHighlight(content, existingHighlightId, selectionId);
     removeMarkers(content);
     return isSelectionInHighlight;
-  }
+  };
 
   var highlightsInSelectionRange = function(containerSelector, range, $document){
     marker = marker || new Marker($document);
@@ -409,7 +427,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
   var reset = function(){
     marker = null;
     nodeFinder = null;
-  }
+  };
 
   return {
     loadHighlights:loadHighlights,
@@ -422,6 +440,8 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     getSelectedHighlight:getSelectedHighlight,
     isHighlighted:isHighlighted,
     highlightsInSelectionRange: highlightsInSelectionRange,
+    findExistingHighlight:findExistingHighlight,
+    getMergedRange:getMergedRange,
     reset:reset
   };
 };
