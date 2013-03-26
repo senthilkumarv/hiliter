@@ -168,6 +168,7 @@ describe("Highlighter", function () {
       expect(highlightData.guid).to.equal("111");
       done();
     });
+
     it("should update highlight data when selection starts at the end of an existing highlight", function (done) {
       mockRangey = { isSelectionWithinSameParent:function () {
         return true;

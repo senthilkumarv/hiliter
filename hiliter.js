@@ -323,7 +323,22 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     return range;
   };
 
-  var highlight = function (containerSelector, className, range, $window, $document, highlightId) {
+  var getMergedHighlightClassNames = function(classNames, existingHighlightId, $document){
+    var highlight = $document.querySelector('[data-highlight-id="'+ existingHighlightId +'"]');
+    var classNameArray = classNames.split(" ");
+    if(!highlight){
+      return classNames;
+    }
+    var existingClassNames = highlight.getAttribute("class").split(" ");
+    for(var i=0; i<existingClassNames.length; i++){
+      if(classNameArray.indexOf(existingClassNames[i]) === -1){
+        classNameArray.push(existingClassNames[i]);
+      } 
+    }
+    return classNameArray.join(" "); 
+  };
+
+  var highlight = function (containerSelector, classNames, range, $window, $document, highlightId) {
     marker = marker || new Marker($document);
     nodeFinder = nodeFinder || new Finder($document);
     highlightId = (highlightId) ? highlightId : (new Date().getTime());
@@ -335,6 +350,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
       var content = $document.querySelector(containerSelector);
       range = createMergedRange(content, existingHighlightId, highlightId, $document);
       wrapSelection(range, existingHighlightId, $document);
+      classNames = getMergedHighlightClassNames(classNames, existingHighlightId, $document);
       highlightId = existingHighlightId;
       removeHighlight(content, existingHighlightId);
     }
@@ -347,8 +363,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     var ancestorPosition = nodeFinder.findNodePosition({
       nodeToFind:commonAncestor,
       content:$document,
-      relativeTo:containerSelector,
-      highlightClass:className
+      relativeTo:containerSelector
     });
 
     var highlightData = {
@@ -356,7 +371,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
       commonAncestorPosition:ancestorPosition,
       startOffset:offset.startOffset,
       endOffset:offset.endOffset,
-      highlightClass:className,
+      highlightClass:classNames,
       content:range.toString()
     };
 
