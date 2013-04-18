@@ -420,12 +420,12 @@ describe("Highlighter", function () {
     });
  
 
-  //  it("should find non highlight parent as body if configured as body", function (done) {
-  //     $("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
-  //     var parent = new Finder(document).findAncestor(document.getElementById("highlight1").childNodes[0], "body");
-  //     expect(parent).to.equal(document.getElementsByTagName("body")[0]);
-  //     done();
-  //   });
+   it("should find non highlight parent as body if configured as body", function (done) {
+      $("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
+      var parent = new Finder(document).findAncestor(document.getElementById("highlight1").childNodes[0], "body");
+      expect(parent).to.equal(document.getElementsByTagName("body")[0], "body");
+      done();
+    });
   });
 
   describe("Rangey", function () {
