@@ -125,7 +125,7 @@ describe("Highlighter", function () {
         return { startOffset:1, endOffset:1};
       }, convertTextOffsetToDocumentOffset:function () {
       } };
-      mockFinder = { findNonHighlightAncestor:function () {
+      mockFinder = { findAncestor:function () {
         return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
       },
         findNodePosition:function () {
@@ -148,7 +148,7 @@ describe("Highlighter", function () {
         return { startOffset:1, endOffset:3};
       }, convertTextOffsetToDocumentOffset:function () {
       } };
-      mockFinder = { findNonHighlightAncestor:function () {
+      mockFinder = { findAncestor:function () {
         return $('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
       },
         findNodePosition:function () {
@@ -163,8 +163,7 @@ describe("Highlighter", function () {
       };
 
       hiliter = new HiliterCls(mockRangey, mockMarker, mockFinder);
-
-      highlightData = hiliter.highlight("#content", "highlight", {}, mockWindow, document, "555");
+       highlightData = hiliter.highlight("#content", "highlight", {}, mockWindow, document, "555");
       expect(highlightData.guid).to.equal("111");
       done();
     });
@@ -176,7 +175,7 @@ describe("Highlighter", function () {
         return { startOffset:1, endOffset:3};
       }, convertTextOffsetToDocumentOffset:function () {
       } };
-      mockFinder = { findNonHighlightAncestor:function () {
+      mockFinder = { findAncestor:function () {
         return $('<div>You can <span data-highlight-id="111" class="highlight">select <span data-identifier="start_555"></span> some random</span> text <span data-identifier="end_555"></span> in this page</div>')[0];
       },
         findNodePosition:function () {
@@ -250,7 +249,7 @@ describe("Highlighter", function () {
         return { startOffset:1, endOffset:1};
       }, convertTextOffsetToDocumentOffset:function () {
       } };
-      mockFinder = { findNonHighlightAncestor:function () {
+      mockFinder = { findAncestor:function () {
         return { innerHTML:"" };
       }, findNodePosition:function () {
         return 0;
@@ -415,11 +414,20 @@ describe("Highlighter", function () {
 
     it("should find non highlight parent", function (done) {
       $("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
-      var parent = new Finder(document).findNonHighlightAncestor(document.getElementById("highlight1").childNodes[0]);
+      var parent = new Finder(document).findAncestor(document.getElementById("highlight1").childNodes[0]);
       expect(parent).to.equal(document.getElementById("content"));
       done();
     });
+ 
+
+  //  it("should find non highlight parent as body if configured as body", function (done) {
+  //     $("#content").html("Find <span data-highlight-id=\"123\" id=\"highlight1\">non-highlight</span> parent");
+  //     var parent = new Finder(document).findAncestor(document.getElementById("highlight1").childNodes[0], "body");
+  //     expect(parent).to.equal(document.getElementsByTagName("body")[0]);
+  //     done();
+  //   });
   });
+
   describe("Rangey", function () {
     it("should give selection is within same parent when start container and end container are same", function (done) {
       var range = {startContainer:1, endContainer:1};

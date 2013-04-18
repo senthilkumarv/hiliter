@@ -123,6 +123,21 @@ var Finder = function ($document) {
     return commonAncestor;
   };
 
+  var findAncestorByNodeName = function (commonAncestor, nodeName) {
+    while (commonAncestor.nodeName.toLowerCase() !== nodeName) {
+      commonAncestor = commonAncestor.parentElement;
+    }
+    return commonAncestor;
+  };
+
+  var findAncestor = function (commonAncestor, nodeName) {
+    if(nodeName){
+      return findAncestorByNodeName(commonAncestor, nodeName);
+      return findNonHighlightAncestor(commonAncestor);
+    }
+    return findNonHighlightAncestor(commonAncestor, nodeName);
+  };
+
   var getFirstNode = function (content, highlightId, selectionId) {
     var nodes = getNodes(content);
     while ((node = nodes.nextNode()) !== null) {
@@ -207,7 +222,7 @@ var Finder = function ($document) {
   return {
     findNodePosition:findNodePosition,
     findNodeByPosition:findNodeByPosition,
-    findNonHighlightAncestor:findNonHighlightAncestor,
+    findAncestor:findAncestor,
     getFirstNode:getFirstNode,
     getLastNode:getLastNode,
     isSelectionStartInHighlight:isSelectionStartInHighlight,
@@ -344,7 +359,8 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     highlightId = (highlightId) ? highlightId : (new Date().getTime());
 
     wrapSelection(range, highlightId);
-    var existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), highlightId);
+    debugger;
+    var existingHighlightId = getExistingHighlight(nodeFinder.findAncestor(range.commonAncestorContainer), highlightId);
 
     if (existingHighlightId) {
       var content = $document.querySelector(containerSelector);
@@ -355,7 +371,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
       removeHighlight(content, existingHighlightId);
     }
 
-    var commonAncestor = nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer);
+    var commonAncestor = nodeFinder.findAncestor(range.commonAncestorContainer);
     var offset = rangey.offsetFromContainer(commonAncestor.innerHTML, highlightId);
     if (offset.startOffset === offset.endOffset)
       return null;
@@ -384,7 +400,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     nodeFinder = nodeFinder || new Finder($document);
     var selectionId = new Date().getTime();
     wrapSelection(range, selectionId);
-    var highlight = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), selectionId);
+    var highlight = getExistingHighlight(nodeFinder.findAncestor(range.commonAncestorContainer), selectionId);
     return highlight;
   };
 
@@ -419,7 +435,7 @@ var HiliterCls = function (rangey, marker, nodeFinder) {
     var selectionId = new Date().getTime(); 
     var content = $document.querySelector(containerSelector);
     wrapSelection(range, selectionId);
-    var existingHighlightId = getExistingHighlight(nodeFinder.findNonHighlightAncestor(range.commonAncestorContainer), selectionId);
+    var existingHighlightId = getExistingHighlight(nodeFinder.findAncestor(range.commonAncestorContainer), selectionId);
     if(!existingHighlightId) return false;
 
     var isSelectionInHighlight = nodeFinder.isSelectionStartInHighlight(content, existingHighlightId, selectionId) && 
