@@ -355,7 +355,6 @@ var HiliterCls = function (rangey, marker, nodeFinder, ancestorNode) {
     highlightId = (highlightId) ? highlightId : (new Date().getTime());
 
     wrapSelection(range, highlightId);
-    debugger;
     var existingHighlightId = getExistingHighlight(nodeFinder.findAncestor(range.commonAncestorContainer, ancestorNode), highlightId);
 
     if (existingHighlightId) {
