@@ -1,7 +1,7 @@
 (function() {
   var root = this
 
-  var Rangey = root.Rangey = function() { }
+  var Rangey = root.Rangey = { }
 
   Rangey.offsetFromContainer = function(content, identifier) {
     var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"");
