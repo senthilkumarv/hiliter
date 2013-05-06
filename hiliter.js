@@ -207,8 +207,12 @@ var Finder = (function() {
   return Finder;
 })();
 
-var HiliterCls = (function() {
-  var HiliterCls = function(options) {
+(function() {
+  var root = this
+    , Hiliter
+    , instance
+
+  root.Hiliter = Hiliter = function(options) {
     options = options || {};
 
     this.window_ = options.window || window;
@@ -220,7 +224,7 @@ var HiliterCls = (function() {
     this.ancestorNode_ = this.document_.querySelector(this.ancestorNodeSelector_);
   }
 
-  HiliterCls.prototype.getExistingHighlight = function(content, markerId) {
+  Hiliter.prototype.getExistingHighlight = function(content, markerId) {
     if (!content || !content.innerHTML) return;
     var node;
     var highlightAttributeId;
@@ -247,7 +251,7 @@ var HiliterCls = (function() {
     return;
   };
 
-  HiliterCls.prototype.addHighlight = function(content, highlight) {
+  Hiliter.prototype.addHighlight = function(content, highlight) {
     var nodeContent = content.innerHTML;
 
     var startOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
@@ -264,25 +268,25 @@ var HiliterCls = (function() {
     return highlight.guid;
   };
 
-  HiliterCls.prototype.removeMarkers = function(content) {
+  Hiliter.prototype.removeMarkers = function(content) {
     this.removeNodes(content, '[data-identifier]');
   };
 
-  HiliterCls.prototype.removeHighlight = function(identifier) {
+  Hiliter.prototype.removeHighlight = function(identifier) {
     var $allHighlightSpans = this.document_.querySelectorAll('span[data-highlight-id="' + identifier + '"]');
     for (var highlightSpan in $allHighlightSpans) {
       $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
     }
   };
 
-  HiliterCls.prototype.clearAllHighlights = function() {
+  Hiliter.prototype.clearAllHighlights = function() {
     var $allHighlightSpans = this.document_.querySelectorAll('span[data-highlight-id]');
     for (var highlightSpan in $allHighlightSpans) {
       $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
     }
   };
 
-  HiliterCls.prototype.removeNodes = function(content, selector) {
+  Hiliter.prototype.removeNodes = function(content, selector) {
     if (!content || !content.innerHTML) return;
     var nodes = content.querySelectorAll(selector);
     for (i = 0; i < nodes.length; i++) {
@@ -290,24 +294,24 @@ var HiliterCls = (function() {
     }
   };
 
-  HiliterCls.prototype.wrapSelection = function(range, identifier) {
+  Hiliter.prototype.wrapSelection = function(range, identifier) {
     this.marker_.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
     this.marker_.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
   };
 
-  HiliterCls.prototype.getSelectedHighlight = function() {
+  Hiliter.prototype.getSelectedHighlight = function() {
     var range = this.window_.getSelection().getRangeAt(0);
     var parent = this.range_.startContainer.parentElement;
     return parent.getAttribute("data-highlight-id");
   };
 
-  HiliterCls.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
+  Hiliter.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
     var selectionId = new Date().getTime();
     wrapSelection(range, selectionId);
     return createMergedRange(this.document_.querySelector(containerSelector), existingHighlightId, selectionId, this.document_);
   };
 
-  HiliterCls.prototype.createMergedRange = function(content, existingHighlightId, selectionId) {
+  Hiliter.prototype.createMergedRange = function(content, existingHighlightId, selectionId) {
     var startNode = this.finder_.getFirstNode(content, existingHighlightId, selectionId);
     var endNode = this.finder_.getLastNode(content, existingHighlightId, selectionId);
 
@@ -317,7 +321,7 @@ var HiliterCls = (function() {
     return range;
   };
 
-  HiliterCls.prototype.getMergedHighlightClassNames = function(classNames, existingHighlightId) {
+  Hiliter.prototype.getMergedHighlightClassNames = function(classNames, existingHighlightId) {
     var highlight = this.document_.querySelector('[data-highlight-id="' + existingHighlightId + '"]');
     var classNameArray = classNames.split(" ");
     if (!highlight) {
@@ -332,7 +336,7 @@ var HiliterCls = (function() {
     return classNameArray.join(" ");
   };
 
-  HiliterCls.prototype.highlight = function(classNames, range, highlightId) {
+  Hiliter.prototype.highlight = function(classNames, range, highlightId) {
     highlightId = (highlightId) ? highlightId : (new Date().getTime());
 
     this.wrapSelection(range, highlightId);
@@ -361,14 +365,14 @@ var HiliterCls = (function() {
     return highlightData;
   };
 
-  HiliterCls.prototype.findExistingHighlight = function(range) {
+  Hiliter.prototype.findExistingHighlight = function(range) {
     var selectionId = new Date().getTime();
     this.wrapSelection(range, selectionId);
 
     return this.getExistingHighlight(this.document_.querySelector(this.ancestorNode_), selectionId);
   };
 
-  HiliterCls.prototype.removeNode = function(node) {
+  Hiliter.prototype.removeNode = function(node) {
     var parentNode = node.parentNode;
     var innerNode;
 
@@ -378,13 +382,13 @@ var HiliterCls = (function() {
     parentNode.removeChild(node);
   };
 
-  HiliterCls.prototype.loadHighlights = function(highlights) {
+  Hiliter.prototype.loadHighlights = function(highlights) {
     highlights.forEach(function(highlight) {
       this.addHighlight(this.ancestorNode_, highlight);
     })
   };
 
-  HiliterCls.prototype.isHighlighted = function(range) {
+  Hiliter.prototype.isHighlighted = function(range) {
     var selectionId = new Date().getTime();
     var content = this.document_.querySelector(containerSelector);
     this.wrapSelection(range, selectionId);
@@ -398,7 +402,7 @@ var HiliterCls = (function() {
     return isSelectionInHighlight;
   };
 
-  HiliterCls.prototype.highlightsInSelectionRange = function(containerSelector, range) {
+  Hiliter.prototype.highlightsInSelectionRange = function(containerSelector, range) {
     var selectionId = new Date().getTime();
     var content = this.document_.querySelector(containerSelector);
     this.wrapSelection(range, selectionId);
@@ -411,7 +415,13 @@ var HiliterCls = (function() {
     return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
   };
 
-  return HiliterCls;
-})()
+  instance = new Hiliter()
 
-var Hiliter = new HiliterCls();
+  Hiliter.getExistingHighlight = function() {
+    return Hiliter.prototype.getExistingHighlight.apply(instance, arguments)
+  }
+
+  Hiliter.removeHighlight = function() {
+    Hiliter.prototype.removeHighlight.apply(instance, arguments)
+  }
+})(this)

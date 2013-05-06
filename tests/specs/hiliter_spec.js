@@ -7,7 +7,7 @@ describe('Highlighter', function() {
     var hiliter;
 
     beforeEach(function(){
-      hiliter = new HiliterCls();
+      hiliter = new Hiliter();
     });
 
     it('should remove highlight tags with no text in them', function() {
@@ -56,7 +56,6 @@ describe('Highlighter', function() {
 
   describe("GetExistingHighlight", function() {
     it("gets highlight when span with highlight exists", function() {
-
       var docWithExistingHighlight = $('<div> <div id=\"container\">' +
           '  <span data-identifier=\"start_111\"></span>' +
           '  <div>' +
@@ -71,7 +70,6 @@ describe('Highlighter', function() {
     });
 
     it("does not get highlight when span with highlight does not exist", function() {
-
       var docWithNoHighlight = $('<div> <div id=\"container\">' +
           '  <div>' +
           '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.' +
@@ -93,9 +91,7 @@ describe('Highlighter', function() {
 
       existingHighlightId = Hiliter.getExistingHighlight(doc, "555");
       expect(existingHighlightId).to.equal("4456");
-
     });
-
   });
 
   describe("highlight", function() {
@@ -132,7 +128,7 @@ describe('Highlighter', function() {
         }
       };
 
-      hiliter = new HiliterCls({
+      hiliter = new Hiliter({
         rangey: mockRangey,
         marker: mockMarker,
         finder: mockFinder
@@ -183,7 +179,7 @@ describe('Highlighter', function() {
 
       $("#content").html('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>');
 
-      hiliter = new HiliterCls({
+      hiliter = new Hiliter({
         rangey: mockRangey,
         marker: mockMarker,
         finder: mockFinder,
@@ -216,7 +212,7 @@ describe('Highlighter', function() {
 
       $("#content").html('<div>You can <span data-highlight-id="111" class="highlight">select <span data-identifier="start_555"></span> some random</span> text <span data-identifier="end_555"></span> in this page</div>');
 
-      hiliter = new HiliterCls({
+      hiliter = new Hiliter({
         rangey: mockRangey,
         marker: mockMarker,
         finder: mockFinder,
@@ -230,7 +226,7 @@ describe('Highlighter', function() {
     });
 
     it("should not add highlight when start and end text offsets are same", function() {
-      hiliter = new HiliterCls({
+      hiliter = new Hiliter({
         marker: mockMarker,
         window: mockWindow
       });
