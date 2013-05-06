@@ -28,6 +28,7 @@
         insideTag = false;
       }
     }
+
     return i;
   };
 
@@ -48,6 +49,7 @@
         insideTag = false;
       }
     }
+
     return index;
   };
 })(this);
