@@ -32,8 +32,8 @@ describe('Highlighter', function() {
     });
 
 
-    it("should not add empty highlight spans for nested tags", function() {
-      var doc = $("<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
+    it('should not add empty highlight spans for nested tags', function() {
+      var doc = $('<div><div>Lorem ipsum dolor<br/></div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>')[0];
       hiliter.addHighlight(doc, {
         guid:1,
         startOffset:2,
@@ -41,11 +41,11 @@ describe('Highlighter', function() {
         highlightClass:'highlight'
       });
       expect(doc.innerHTML)
-          .to.equal("<div>L<span data-highlight-id=\"1\" class=\"highlight\">orem ipsum dolor</span><br></div><span data-highlight-id=\"1\" class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
+          .to.equal('<div>L<span data-highlight-id="1" class="highlight">orem ipsum dolor</span><br></div><span data-highlight-id="1" class="highlight"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.');
     });
 
-    it("should add highlight for nested tags", function() {
-      var doc = $("<div><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>")[0];
+    it('should add highlight for nested tags', function() {
+      var doc = $('<div><div>Lorem ipsum dolor</div> sit <div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.</div>')[0];
       hiliter.addHighlight(doc, {
         guid:1,
         startOffset:2,
@@ -53,51 +53,51 @@ describe('Highlighter', function() {
         highlightClass:'highlight'
       });
       expect(doc.innerHTML)
-          .to.equal("<div>L<span data-highlight-id=\"1\" class=\"highlight\">orem ipsum dolor</span></div><span data-highlight-id=\"1\" class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
+          .to.equal('<div>L<span data-highlight-id="1" class="highlight">orem ipsum dolor</span></div><span data-highlight-id="1" class="highlight"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.');
     });
   });
 
-  describe("GetExistingHighlight", function() {
-    it("gets highlight when span with highlight exists", function() {
-      var docWithExistingHighlight = $('<div> <div id=\"container\">' +
-          '  <span data-identifier=\"start_111\"></span>' +
+  describe('GetExistingHighlight', function() {
+    it('gets highlight when span with highlight exists', function() {
+      var docWithExistingHighlight = $('<div> <div id="container">' +
+          '  <span data-identifier="start_111"></span>' +
           '  <div>' +
-          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.' +
+          '    Hello <span data-highlight-id="1" class="highlight">World</span>.' +
           '    Some more ' +
-          '    <span data-identifier=\"end_111\"></span>' +
+          '    <span data-identifier="end_111"></span>' +
           '    text here.' +
           '  </div>' +
           '</div> </div>')[0];
-      var hasHighlight = Hiliter.getExistingHighlight(docWithExistingHighlight, "111");
+      var hasHighlight = Hiliter.getExistingHighlight(docWithExistingHighlight, '111');
       expect(hasHighlight).to.equal('1');
     });
 
-    it("does not get highlight when span with highlight does not exist", function() {
-      var docWithNoHighlight = $('<div> <div id=\"container\">' +
+    it('does not get highlight when span with highlight does not exist', function() {
+      var docWithNoHighlight = $('<div> <div id="container">' +
           '  <div>' +
-          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.' +
-          '  <span data-identifier=\"start_111\"></span>' +
+          '    Hello <span data-highlight-id="1" class="highlight">World</span>.' +
+          '  <span data-identifier="start_111"></span>' +
           '    Some more ' +
-          '    <span data-identifier=\"end_111\"></span>' +
-          '    Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>.' +
+          '    <span data-identifier="end_111"></span>' +
+          '    Hello <span data-highlight-id="1" class="highlight">World</span>.' +
           '    text here.' +
           '  </div>' +
           '</div> </div>')[0];
-      var hasHighlight = Hiliter.getExistingHighlight(docWithNoHighlight, "111");
+      var hasHighlight = Hiliter.getExistingHighlight(docWithNoHighlight, '111');
       expect(hasHighlight).to.equal(undefined);
     });
 
-    it("gets existing highlight if selection start alone is in existing highlight", function() {
+    it('gets existing highlight if selection start alone is in existing highlight', function() {
       var doc = $('<div><div id="content"><div>You <span data-highlight-id="4456">can select' +
            '<span data-identifier="start_555"></span> some random</span>' +
           ' text <span data-identifier="end_555"></span> in this page</div></div></div>')[0];
 
-      existingHighlightId = Hiliter.getExistingHighlight(doc, "555");
-      expect(existingHighlightId).to.equal("4456");
+      existingHighlightId = Hiliter.getExistingHighlight(doc, '555');
+      expect(existingHighlightId).to.equal('4456');
     });
   });
 
-  describe("highlight", function() {
+  describe('highlight', function() {
     var mockMarker, mockRangey, mockFinder, mockWindow, hiliter;
 
     beforeEach(function() {
@@ -150,7 +150,7 @@ describe('Highlighter', function() {
       };
     });
 
-    it("should update highlight when selection already contains a highlight", function() {
+    it('should update highlight when selection already contains a highlight', function() {
       mockRangey = {
         isSelectionWithinSameParent: function() {
           return true;
@@ -180,7 +180,7 @@ describe('Highlighter', function() {
         }
       };
 
-      $("#content").html('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>');
+      $('#content').html('<div>You can select <span data-identifier="start_555"></span> some <span data-highlight-id="111" class="highlight">random</span> text <span data-identifier="end_555"></span> in this page</div>');
 
       hiliter = new Hiliter({
         rangey: mockRangey,
@@ -189,11 +189,11 @@ describe('Highlighter', function() {
         window: mockWindow
       });
 
-      highlightData = hiliter.highlight("highlight", {}, "555");
-      expect(highlightData.guid).to.equal("111");
+      highlightData = hiliter.highlight('highlight', {}, '555');
+      expect(highlightData.guid).to.equal('111');
     });
 
-    it("should update highlight data when selection starts at the end of an existing highlight", function() {
+    it('should update highlight data when selection starts at the end of an existing highlight', function() {
       mockRangey = { isSelectionWithinSameParent:function() {
         return true;
       }, offsetFromContainer:function() {
@@ -213,7 +213,7 @@ describe('Highlighter', function() {
           return $('<span data-identifier="end_555"></span>')[0];
         }};
 
-      $("#content").html('<div>You can <span data-highlight-id="111" class="highlight">select <span data-identifier="start_555"></span> some random</span> text <span data-identifier="end_555"></span> in this page</div>');
+      $('#content').html('<div>You can <span data-highlight-id="111" class="highlight">select <span data-identifier="start_555"></span> some random</span> text <span data-identifier="end_555"></span> in this page</div>');
 
       hiliter = new Hiliter({
         rangey: mockRangey,
@@ -222,47 +222,47 @@ describe('Highlighter', function() {
         window: mockWindow
       });
 
-      highlightData = hiliter.highlight("highlight", {}, "555");
-      expect(highlightData.guid).to.equal("111");
+      highlightData = hiliter.highlight('highlight', {}, '555');
+      expect(highlightData.guid).to.equal('111');
       expect(highlightData.startOffset).to.equal(1);
       expect(highlightData.endOffset).to.equal(3);
     });
 
-    it("should not add highlight when start and end text offsets are same", function() {
+    it('should not add highlight when start and end text offsets are same', function() {
       hiliter = new Hiliter({
         marker: mockMarker,
         window: mockWindow
       });
-      var result = hiliter.highlight("", {}, "");
+      var result = hiliter.highlight('', {}, '');
       expect(result).to.equal(null);
     });
 
-    it("should return highlight obj when start and end text offsets are not same", function() {
+    it('should return highlight obj when start and end text offsets are not same', function() {
       mockRangey.offsetFromContainer = function() {
         return {
           startOffset:1,
           endOffset: 2
         };
       };
-      var result = hiliter.highlight("", mockWindow, document, "");
+      var result = hiliter.highlight('', mockWindow, document, '');
       expect(result.startOffset).to.equal(1);
       expect(result.endOffset).to.equal(2);
     });
   });
 
-  describe("Remove highlight", function() {
-    it("should remove highlights with given identifier", function() {
-      $("#content").html('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>. Some more text here.</div>')
+  describe('Remove highlight', function() {
+    it('should remove highlights with given identifier', function() {
+      $('#content').html('<div>Hello <span data-highlight-id="1" class="highlight">World</span>. Some more text here.</div>')
       Hiliter.removeHighlight(1);
-      expect($("#content").html())
-      .to.equal("<div>Hello World. Some more text here.</div>");
+      expect($('#content').html())
+      .to.equal('<div>Hello World. Some more text here.</div>');
     });
 
-    it("should not remove highlights that does not match the given identifier", function() {
-      $("#content").html('<div>Hello <span data-highlight-id=\"1\" class=\"highlight\">World</span>. <span data-highlight-id=\"2\" class=\"highlight\">Some</span> more text here.</div>');
+    it('should not remove highlights that does not match the given identifier', function() {
+      $('#content').html('<div>Hello <span data-highlight-id="1" class="highlight">World</span>. <span data-highlight-id="2" class="highlight">Some</span> more text here.</div>');
       Hiliter.removeHighlight(1);
-      expect($("#content").html())
-      .to.equal("<div>Hello World. <span data-highlight-id=\"2\" class=\"highlight\">Some</span> more text here.</div>");
+      expect($('#content').html())
+      .to.equal('<div>Hello World. <span data-highlight-id="2" class="highlight">Some</span> more text here.</div>');
     });
   });
 });
