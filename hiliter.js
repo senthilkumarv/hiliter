@@ -211,7 +211,6 @@
 (function() {
   var root = this
     , Hiliter
-    , instance
 
   root.Hiliter = Hiliter = function(options) {
     options = options || {};
@@ -416,13 +415,9 @@
     return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
   };
 
-  instance = new Hiliter();
-
-  Hiliter.getExistingHighlight = function() {
-    return Hiliter.prototype.getExistingHighlight.apply(instance, arguments);
-  };
-
-  Hiliter.removeHighlight = function() {
-    Hiliter.prototype.removeHighlight.apply(instance, arguments);
-  };
+  Object.keys(Hiliter.prototype).forEach(function(k) {
+    Hiliter[k] = function() {
+      return Hiliter.prototype[k].apply(new Hiliter(), arguments);
+    };
+  });
 })(this);
