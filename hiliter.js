@@ -1,8 +1,7 @@
 (function() {
   var root = this
-    , Rangey
 
-  Rangey = root.Rangey = function() { }
+  var Rangey = root.Rangey = function() { }
 
   Rangey.offsetFromContainer = function(content, identifier) {
     var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"");
@@ -52,9 +51,8 @@
 
 (function() {
   var root = this
-    , Marker
 
-  Marker = root.Marker = function($document) {
+  var Marker = root.Marker = function($document) {
     this.document_ = $document || window.document;
   };
 
@@ -87,9 +85,8 @@
 
 (function() {
   var root = this
-    , Finder
 
-  Finder = root.Finder = function(document) {
+  var Finder = root.Finder = function(document) {
     this.document_ = document || window.document;
   }
 
@@ -210,9 +207,8 @@
 
 (function() {
   var root = this
-    , Hiliter
 
-  root.Hiliter = Hiliter = function(options) {
+  var Hiliter = root.Hiliter = function(options) {
     options = options || {};
 
     this.window_ = options.window || window;
