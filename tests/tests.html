@@ -3,25 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="libs/mocha.css" />
-	<script type="text/javascript" src="libs/jquery.js"></script>
+    <script type="text/javascript" src="libs/jquery.js"></script>
     <script type="text/javascript" src="libs/mocha.js"></script>
     <script type="text/javascript" src="libs/chai.js"></script>
     <script type="text/javascript" src="libs/sinon.js"></script>
   </head>
   <body>
     <div id="mocha"></div>
-	<div id="content"></div>
+    <div id="content"></div>
     <script type="text/javascript" >
         var expect = chai.expect;
         mocha.setup({ ui: 'bdd', ignoreLeaks: false });
-        onload = function () {
-          if(window.mochaPhantomJS) {
+
+        onload = function() {
+          if (window.mochaPhantomJS) {
             return mochaPhantomJS.run();
           }
           mocha.run();
         };
     </script>
-	<script type="text/javascript" src="../hiliter.js"></script>
+    <script type="text/javascript" src="../hiliter.js"></script>
+    <script type="text/javascript" src="specs/rangey_spec.js"></script>
+    <script type="text/javascript" src="specs/marker_spec.js"></script>
+    <script type="text/javascript" src="specs/finder_spec.js"></script>
     <script type="text/javascript" src="specs/hiliter_spec.js"></script>
   </body>
 </html>
