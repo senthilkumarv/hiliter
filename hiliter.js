@@ -123,19 +123,11 @@ var Finder = function ($document) {
     return commonAncestor;
   };
 
-  var findAncestorByNodeName = function (commonAncestor, nodeName) {
-    while (commonAncestor.nodeName.toLowerCase() !== nodeName) {
-      commonAncestor = commonAncestor.parentElement;
+  var findAncestor = function (commonAncestor, selector) {
+    if (selector) {
+      return $document.querySelector(selector);
     }
-    return commonAncestor;
-  };
-
-  var findAncestor = function (commonAncestor, nodeName) {
-    if (nodeName) {
-      return findAncestorByNodeName(commonAncestor, nodeName);
-      return findNonHighlightAncestor(commonAncestor);
-    }
-    return findNonHighlightAncestor(commonAncestor, nodeName);
+    return findNonHighlightAncestor(commonAncestor);
   };
 
   var getFirstNode = function (content, highlightId, selectionId) {
@@ -310,8 +302,7 @@ var HiliterCls = function (rangey, marker, nodeFinder, ancestorNode) {
   };
 
   var getSelectedHighlight = function ($window) {
-    var range = $window.getSelection()
-      .getRangeAt(0);
+    var range = $window.getSelection().getRangeAt(0);
     var parent = range.startContainer.parentElement;
     return parent.getAttribute("data-highlight-id");
   };
@@ -399,7 +390,6 @@ var HiliterCls = function (rangey, marker, nodeFinder, ancestorNode) {
   };
 
   var removeNode = function (node) {
-
     var parentNode = node.parentNode;
     var innerNode;
 
@@ -452,10 +442,6 @@ var HiliterCls = function (rangey, marker, nodeFinder, ancestorNode) {
     marker = null;
     nodeFinder = null;
   };
-  var useAncestorNode = function (ancestorNodeName) {
-    ancestorNode = ancestorNodeName;
-  };
-
 
   return {
     loadHighlights: loadHighlights,
@@ -470,8 +456,8 @@ var HiliterCls = function (rangey, marker, nodeFinder, ancestorNode) {
     highlightsInSelectionRange: highlightsInSelectionRange,
     findExistingHighlight: findExistingHighlight,
     getMergedRange: getMergedRange,
-    reset: reset,
-    useAncestorNode: useAncestorNode
+    reset: reset
   };
 };
+
 var Hiliter = new HiliterCls(Rangey);
