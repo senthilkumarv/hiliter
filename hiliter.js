@@ -1,20 +1,10 @@
-var Rangey = (function() {
-  var calculateOffsetTill = function(container, endIndex) {
-    var insideTag = false;
-    var index = 1;
-    for (var i = 0; i <= endIndex; i++) {
-      if (container[i] === '<') {
-        insideTag = true;
-      }
-      index += (insideTag) ? 0 : 1;
-      if (container[i] === '>') {
-        insideTag = false;
-      }
-    }
-    return index;
-  };
+(function() {
+  var root = this
+    , Rangey
 
-  var offsetFromContainer = function(content, identifier) {
+  Rangey = root.Rangey = function() { }
+
+  Rangey.offsetFromContainer = function(content, identifier) {
     var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"");
     var endOffset = content.indexOf("<span data-identifier=\"end_" + identifier + "\"");
     endOffset = content.indexOf("</span>", endOffset);
@@ -24,7 +14,7 @@ var Rangey = (function() {
     };
   };
 
-  var convertTextOffsetToDocumentOffset = function(content, offset) {
+  Rangey.convertTextOffsetToDocumentOffset = function(content, offset) {
     var insideTag = false;
     var index = 0,
       i = 0;
@@ -40,19 +30,31 @@ var Rangey = (function() {
     return i;
   };
 
-  var isSelectionWithinSameParent = function(range) {
+  Rangey.isSelectionWithinSameParent = function(range) {
     return range.startContainer == range.endContainer;
   };
 
-  return {
-    offsetFromContainer: offsetFromContainer,
-    convertTextOffsetToDocumentOffset: convertTextOffsetToDocumentOffset,
-    isSelectionWithinSameParent: isSelectionWithinSameParent
+  var calculateOffsetTill = function(container, endIndex) {
+    var insideTag = false;
+    var index = 1;
+    for (var i = 0; i <= endIndex; i++) {
+      if (container[i] === '<') {
+        insideTag = true;
+      }
+      index += (insideTag) ? 0 : 1;
+      if (container[i] === '>') {
+        insideTag = false;
+      }
+    }
+    return index;
   };
-})();
+})(this);
 
-var Marker = (function() {
-  var Marker = function($document) {
+(function() {
+  var root = this
+    , Marker
+
+  Marker = root.Marker = function($document) {
     this.document_ = $document || window.document;
   };
 
@@ -81,13 +83,14 @@ var Marker = (function() {
     newRange.setEnd(element, endOffset);
     newRange.surroundContents(marker);
   };
+})(this);
 
-  return Marker;
-})();
+(function() {
+  var root = this
+    , Finder
 
-var Finder = (function() {
-  var Finder = function($document) {
-    this.document_ = $document || window.document;
+  Finder = root.Finder = function(document) {
+    this.document_ = document || window.document;
   }
 
   Finder.prototype.findNodePosition = function(data) {
@@ -203,9 +206,7 @@ var Finder = (function() {
     }
     return commonAncestor;
   };
-
-  return Finder;
-})();
+})(this);
 
 (function() {
   var root = this
@@ -415,13 +416,13 @@ var Finder = (function() {
     return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
   };
 
-  instance = new Hiliter()
+  instance = new Hiliter();
 
   Hiliter.getExistingHighlight = function() {
-    return Hiliter.prototype.getExistingHighlight.apply(instance, arguments)
-  }
+    return Hiliter.prototype.getExistingHighlight.apply(instance, arguments);
+  };
 
   Hiliter.removeHighlight = function() {
-    Hiliter.prototype.removeHighlight.apply(instance, arguments)
-  }
-})(this)
+    Hiliter.prototype.removeHighlight.apply(instance, arguments);
+  };
+})(this);
