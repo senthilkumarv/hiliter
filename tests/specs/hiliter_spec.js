@@ -52,12 +52,6 @@ describe('Highlighter', function() {
       expect(doc.innerHTML)
           .to.equal("<div>L<span data-highlight-id=\"1\" class=\"highlight\">orem ipsum dolor</span></div><span data-highlight-id=\"1\" class=\"highlight\"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.");
     });
-
-    it("should create highlight tag given id and class name", function() {
-      var result = hiliter.highlightTagWithId(1, "someClass");
-      expect(result).
-          to.equal("<span data-highlight-id=\"1\" class=\"someClass\">");
-    });
   });
 
   describe("GetExistingHighlight", function() {

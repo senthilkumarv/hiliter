@@ -207,207 +207,211 @@ var Finder = (function() {
   return Finder;
 })();
 
-var HiliterCls = function(options) {
-  options = options || {};
+var HiliterCls = (function() {
+  var HiliterCls = function(options) {
+    options = options || {};
 
-  this.window_ = options.window || window;
-  this.document_ = options.document || this.window_.document;
-  this.finder_ = options.finder || new Finder(this.document_);
-  this.rangey_ = options.rangey || Rangey;
-  this.marker_ = options.marker || new Marker(this.document_);
-  this.ancestorNodeSelector_ = options.ancestorNodeSelector || "#content";
-  this.ancestorNode_ = this.document_.querySelector(this.ancestorNodeSelector_);
-}
+    this.window_ = options.window || window;
+    this.document_ = options.document || this.window_.document;
+    this.finder_ = options.finder || new Finder(this.document_);
+    this.rangey_ = options.rangey || Rangey;
+    this.marker_ = options.marker || new Marker(this.document_);
+    this.ancestorNodeSelector_ = options.ancestorNodeSelector || "#content";
+    this.ancestorNode_ = this.document_.querySelector(this.ancestorNodeSelector_);
+  }
 
-HiliterCls.prototype.highlightTagWithId = function(id, className) {
-  return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
-};
+  HiliterCls.prototype.getExistingHighlight = function(content, markerId) {
+    if (!content || !content.innerHTML) return;
+    var node;
+    var highlightAttributeId;
+    var nodes = this.document_.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
+    while ((node = nodes.nextNode()) !== null) {
+      if (node.getAttribute("data-identifier") === "start_" + markerId) {
+        highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
+        if (highlightAttributeId) {
+          return highlightAttributeId;
+        }
+        break;
+      }
+    }
 
-HiliterCls.prototype.getExistingHighlight = function(content, markerId) {
-  if (!content || !content.innerHTML) return;
-  var node;
-  var highlightAttributeId;
-  var nodes = this.document_.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
-  while ((node = nodes.nextNode()) !== null) {
-    if (node.getAttribute("data-identifier") === "start_" + markerId) {
-      highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
+    while ((node = nodes.nextNode()) !== null) {
+      highlightAttributeId = node.getAttribute("data-highlight-id");
       if (highlightAttributeId) {
         return highlightAttributeId;
       }
-      break;
+      if (node.getAttribute("data-identifier") === "end_" + markerId) {
+        return;
+      }
     }
-  }
-
-  while ((node = nodes.nextNode()) !== null) {
-    highlightAttributeId = node.getAttribute("data-highlight-id");
-    if (highlightAttributeId) {
-      return highlightAttributeId;
-    }
-    if (node.getAttribute("data-identifier") === "end_" + markerId) {
-      return;
-    }
-  }
-  return;
-};
-
-HiliterCls.prototype.addHighlight = function(content, highlight) {
-  var nodeContent = content.innerHTML;
-
-  var startOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
-  var endOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
-  var htmlElement = nodeContent.substring(0, startOffset - 1) + this.highlightTagWithId(highlight.guid, highlight.highlightClass);
-  for (var i = startOffset - 1; i < endOffset; i++) {
-    htmlElement += nodeContent[i];
-    if (nodeContent[i] === '<') htmlElement += "/span><";
-    if (nodeContent[i] === '>') htmlElement += this.highlightTagWithId(highlight.guid, highlight.highlightClass);
-  }
-  htmlElement += "</span>";
-  content.innerHTML = this.marker_.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
-  this.removeMarkers(content);
-  return highlight.guid;
-};
-
-HiliterCls.prototype.removeMarkers = function(content) {
-  this.removeNodes(content, '[data-identifier]');
-};
-
-HiliterCls.prototype.removeHighlight = function(identifier) {
-  var $allHighlightSpans = this.document_.querySelectorAll('span[data-highlight-id="' + identifier + '"]');
-  for (var highlightSpan in $allHighlightSpans) {
-    $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
-  }
-};
-
-HiliterCls.prototype.clearAllHighlights = function() {
-  var $allHighlightSpans = this.document_.querySelectorAll('span[data-highlight-id]');
-  for (var highlightSpan in $allHighlightSpans) {
-    $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
-  }
-};
-
-HiliterCls.prototype.removeNodes = function(content, selector) {
-  if (!content || !content.innerHTML) return;
-  var nodes = content.querySelectorAll(selector);
-  for (i = 0; i < nodes.length; i++) {
-    this.removeNode(nodes[i]);
-  }
-};
-
-HiliterCls.prototype.wrapSelection = function(range, identifier) {
-  this.marker_.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
-  this.marker_.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
-};
-
-HiliterCls.prototype.getSelectedHighlight = function() {
-  var range = this.window_.getSelection().getRangeAt(0);
-  var parent = this.range_.startContainer.parentElement;
-  return parent.getAttribute("data-highlight-id");
-};
-
-HiliterCls.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
-  var selectionId = new Date().getTime();
-  wrapSelection(range, selectionId);
-  return createMergedRange(this.document_.querySelector(containerSelector), existingHighlightId, selectionId, this.document_);
-};
-
-HiliterCls.prototype.createMergedRange = function(content, existingHighlightId, selectionId) {
-  var startNode = this.finder_.getFirstNode(content, existingHighlightId, selectionId);
-  var endNode = this.finder_.getLastNode(content, existingHighlightId, selectionId);
-
-  var range = this.document_.createRange();
-  range.setStart(startNode, 0);
-  range.setEndAfter(endNode);
-  return range;
-};
-
-HiliterCls.prototype.getMergedHighlightClassNames = function(classNames, existingHighlightId) {
-  var highlight = this.document_.querySelector('[data-highlight-id="' + existingHighlightId + '"]');
-  var classNameArray = classNames.split(" ");
-  if (!highlight) {
-    return classNames;
-  }
-  var existingClassNames = highlight.getAttribute("class").split(" ");
-  for (var i = 0; i < existingClassNames.length; i++) {
-    if (classNameArray.indexOf(existingClassNames[i]) === -1) {
-      classNameArray.push(existingClassNames[i]);
-    }
-  }
-  return classNameArray.join(" ");
-};
-
-HiliterCls.prototype.highlight = function(classNames, range, highlightId) {
-  highlightId = (highlightId) ? highlightId : (new Date().getTime());
-
-  this.wrapSelection(range, highlightId);
-  var existingHighlightId = this.getExistingHighlight(this.ancestorNode_, highlightId);
-
-  if (existingHighlightId) {
-    range = this.createMergedRange(this.ancestorNode_, existingHighlightId, highlightId, window.document_);
-    this.wrapSelection(range, existingHighlightId, window.document_);
-    classNames = this.getMergedHighlightClassNames(classNames, existingHighlightId, window.document_);
-    highlightId = existingHighlightId;
-    this.removeHighlight(this.ancestorNode_, existingHighlightId);
-  }
-
-  var offset = this.rangey_.offsetFromContainer(this.ancestorNode_.innerHTML, highlightId);
-  if (offset.startOffset === offset.endOffset) return null;
-
-  var highlightData = {
-    guid: highlightId,
-    startOffset: offset.startOffset,
-    endOffset: offset.endOffset,
-    highlightClass: classNames,
-    content: range.toString()
+    return;
   };
 
-  this.addHighlight(this.ancestorNode_, highlightData);
-  return highlightData;
-};
+  HiliterCls.prototype.addHighlight = function(content, highlight) {
+    var nodeContent = content.innerHTML;
 
-HiliterCls.prototype.findExistingHighlight = function(range) {
-  var selectionId = new Date().getTime();
-  this.wrapSelection(range, selectionId);
+    var startOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset);
+    var endOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1);
+    var htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.highlightClass);
+    for (var i = startOffset - 1; i < endOffset; i++) {
+      htmlElement += nodeContent[i];
+      if (nodeContent[i] === '<') htmlElement += "/span><";
+      if (nodeContent[i] === '>') htmlElement += highlightTagWithId(highlight.guid, highlight.highlightClass);
+    }
+    htmlElement += "</span>";
+    content.innerHTML = this.marker_.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
+    this.removeMarkers(content);
+    return highlight.guid;
+  };
 
-  return this.getExistingHighlight(this.document_.querySelector(this.ancestorNode_), selectionId);
-};
+  HiliterCls.prototype.removeMarkers = function(content) {
+    this.removeNodes(content, '[data-identifier]');
+  };
 
-HiliterCls.prototype.removeNode = function(node) {
-  var parentNode = node.parentNode;
-  var innerNode;
+  HiliterCls.prototype.removeHighlight = function(identifier) {
+    var $allHighlightSpans = this.document_.querySelectorAll('span[data-highlight-id="' + identifier + '"]');
+    for (var highlightSpan in $allHighlightSpans) {
+      $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
+    }
+  };
 
-  while (innerNode = node.firstChild) {
-    parentNode.insertBefore(innerNode, node);
-  }
-  parentNode.removeChild(node);
-};
+  HiliterCls.prototype.clearAllHighlights = function() {
+    var $allHighlightSpans = this.document_.querySelectorAll('span[data-highlight-id]');
+    for (var highlightSpan in $allHighlightSpans) {
+      $allHighlightSpans[highlightSpan].outerHTML = $allHighlightSpans[highlightSpan].innerHTML;
+    }
+  };
 
-HiliterCls.prototype.loadHighlights = function(highlights) {
-  highlights.forEach(function(highlight) {
-    this.addHighlight(this.ancestorNode_, highlight);
-  })
-};
+  HiliterCls.prototype.removeNodes = function(content, selector) {
+    if (!content || !content.innerHTML) return;
+    var nodes = content.querySelectorAll(selector);
+    for (i = 0; i < nodes.length; i++) {
+      this.removeNode(nodes[i]);
+    }
+  };
 
-HiliterCls.prototype.isHighlighted = function(range) {
-  var selectionId = new Date().getTime();
-  var content = this.document_.querySelector(containerSelector);
-  this.wrapSelection(range, selectionId);
-  var existingHighlightId = this.getExistingHighlight(this.ancestorNode_, selectionId);
-  if (!existingHighlightId) return false;
+  HiliterCls.prototype.wrapSelection = function(range, identifier) {
+    this.marker_.setStartMarkerAt(identifier, range.startContainer, range.startOffset, range.startOffset);
+    this.marker_.setEndMarkerAt(identifier, range.endContainer, range.endOffset, range.endOffset);
+  };
 
-  var isSelectionInHighlight = this.finder_.isSelectionStartInHighlight(this.ancestorNode_, existingHighlightId, selectionId) &&
-    this.finder_.isSelectionEndInHighlight(this.ancestorNode_, existingHighlightId, selectionId);
+  HiliterCls.prototype.getSelectedHighlight = function() {
+    var range = this.window_.getSelection().getRangeAt(0);
+    var parent = this.range_.startContainer.parentElement;
+    return parent.getAttribute("data-highlight-id");
+  };
 
-  this.removeMarkers(this.ancestorNode_);
-  return isSelectionInHighlight;
-};
+  HiliterCls.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
+    var selectionId = new Date().getTime();
+    wrapSelection(range, selectionId);
+    return createMergedRange(this.document_.querySelector(containerSelector), existingHighlightId, selectionId, this.document_);
+  };
 
-HiliterCls.prototype.highlightsInSelectionRange = function(containerSelector, range) {
-  var selectionId = new Date().getTime();
-  var content = this.document_.querySelector(containerSelector);
-  this.wrapSelection(range, selectionId);
-  var numberOfHighlights = this.finder_.findHighlights(content, selectionId);
-  this.removeMarkers(content);
-  return numberOfHighlights;
-};
+  HiliterCls.prototype.createMergedRange = function(content, existingHighlightId, selectionId) {
+    var startNode = this.finder_.getFirstNode(content, existingHighlightId, selectionId);
+    var endNode = this.finder_.getLastNode(content, existingHighlightId, selectionId);
+
+    var range = this.document_.createRange();
+    range.setStart(startNode, 0);
+    range.setEndAfter(endNode);
+    return range;
+  };
+
+  HiliterCls.prototype.getMergedHighlightClassNames = function(classNames, existingHighlightId) {
+    var highlight = this.document_.querySelector('[data-highlight-id="' + existingHighlightId + '"]');
+    var classNameArray = classNames.split(" ");
+    if (!highlight) {
+      return classNames;
+    }
+    var existingClassNames = highlight.getAttribute("class").split(" ");
+    for (var i = 0; i < existingClassNames.length; i++) {
+      if (classNameArray.indexOf(existingClassNames[i]) === -1) {
+        classNameArray.push(existingClassNames[i]);
+      }
+    }
+    return classNameArray.join(" ");
+  };
+
+  HiliterCls.prototype.highlight = function(classNames, range, highlightId) {
+    highlightId = (highlightId) ? highlightId : (new Date().getTime());
+
+    this.wrapSelection(range, highlightId);
+    var existingHighlightId = this.getExistingHighlight(this.ancestorNode_, highlightId);
+
+    if (existingHighlightId) {
+      range = this.createMergedRange(this.ancestorNode_, existingHighlightId, highlightId, window.document_);
+      this.wrapSelection(range, existingHighlightId, window.document_);
+      classNames = this.getMergedHighlightClassNames(classNames, existingHighlightId, window.document_);
+      highlightId = existingHighlightId;
+      this.removeHighlight(this.ancestorNode_, existingHighlightId);
+    }
+
+    var offset = this.rangey_.offsetFromContainer(this.ancestorNode_.innerHTML, highlightId);
+    if (offset.startOffset === offset.endOffset) return null;
+
+    var highlightData = {
+      guid: highlightId,
+      startOffset: offset.startOffset,
+      endOffset: offset.endOffset,
+      highlightClass: classNames,
+      content: range.toString()
+    };
+
+    this.addHighlight(this.ancestorNode_, highlightData);
+    return highlightData;
+  };
+
+  HiliterCls.prototype.findExistingHighlight = function(range) {
+    var selectionId = new Date().getTime();
+    this.wrapSelection(range, selectionId);
+
+    return this.getExistingHighlight(this.document_.querySelector(this.ancestorNode_), selectionId);
+  };
+
+  HiliterCls.prototype.removeNode = function(node) {
+    var parentNode = node.parentNode;
+    var innerNode;
+
+    while (innerNode = node.firstChild) {
+      parentNode.insertBefore(innerNode, node);
+    }
+    parentNode.removeChild(node);
+  };
+
+  HiliterCls.prototype.loadHighlights = function(highlights) {
+    highlights.forEach(function(highlight) {
+      this.addHighlight(this.ancestorNode_, highlight);
+    })
+  };
+
+  HiliterCls.prototype.isHighlighted = function(range) {
+    var selectionId = new Date().getTime();
+    var content = this.document_.querySelector(containerSelector);
+    this.wrapSelection(range, selectionId);
+    var existingHighlightId = this.getExistingHighlight(this.ancestorNode_, selectionId);
+    if (!existingHighlightId) return false;
+
+    var isSelectionInHighlight = this.finder_.isSelectionStartInHighlight(this.ancestorNode_, existingHighlightId, selectionId) &&
+      this.finder_.isSelectionEndInHighlight(this.ancestorNode_, existingHighlightId, selectionId);
+
+    this.removeMarkers(this.ancestorNode_);
+    return isSelectionInHighlight;
+  };
+
+  HiliterCls.prototype.highlightsInSelectionRange = function(containerSelector, range) {
+    var selectionId = new Date().getTime();
+    var content = this.document_.querySelector(containerSelector);
+    this.wrapSelection(range, selectionId);
+    var numberOfHighlights = this.finder_.findHighlights(content, selectionId);
+    this.removeMarkers(content);
+    return numberOfHighlights;
+  };
+
+  var highlightTagWithId = function(id, className) {
+    return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
+  };
+
+  return HiliterCls;
+})()
 
 var Hiliter = new HiliterCls();
