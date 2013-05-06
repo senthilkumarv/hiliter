@@ -4,9 +4,9 @@
   var Rangey = root.Rangey = { }
 
   Rangey.offsetFromContainer = function(content, identifier) {
-    var startOffset = content.indexOf("<span data-identifier=\"start_" + identifier + "\"")
-      , startOffsetOfEndTag = content.indexOf("<span data-identifier=\"end_" + identifier + "\"")
-      , endOffset = content.indexOf("</span>", startOffsetOfEndTag);
+    var startOffset = content.indexOf('<span data-identifier="start_' + identifier + '"')
+      , startOffsetOfEndTag = content.indexOf('<span data-identifier="end_' + identifier + '"')
+      , endOffset = content.indexOf('</span>', startOffsetOfEndTag);
 
     return {
       startOffset: calculateOffsetTill(content, startOffset),
@@ -60,21 +60,21 @@
   };
 
   Marker.prototype.setStartMarkerAt = function(identifier, element, startOffset, endOffset) {
-    wrapRangeWithMarker.call(this, element, startOffset, endOffset, createMarkerWithIdentifier.call(this, identifier, "start"));
+    wrapRangeWithMarker.call(this, element, startOffset, endOffset, createMarkerWithIdentifier.call(this, identifier, 'start'));
   };
 
   Marker.prototype.setEndMarkerAt = function(identifier, element, startOffset, endOffset) {
-    wrapRangeWithMarker.call(this, element, startOffset, endOffset, createMarkerWithIdentifier.call(this, identifier, "end"));
+    wrapRangeWithMarker.call(this, element, startOffset, endOffset, createMarkerWithIdentifier.call(this, identifier, 'end'));
   };
 
   Marker.prototype.sanitize = function(content, identifier) {
-    var regex = new RegExp("(<span[^>]+data-highlight-id\\s*=\\s*(\"|')" + identifier + "\\2[^>]*>)(\\s*)(</span>)", 'g');
+    var regex = new RegExp('(<span[^>]+data-highlight-id\\s*=\\s*("|\')' + identifier + '\\2[^>]*>)(\\s*)(</span>)', 'g');
     return content.replace(regex, '');
   };
 
   var createMarkerWithIdentifier = function(identifier, type) {
     var element = this.document_.createElement('span');
-    element.setAttribute('data-identifier', type + "_" + identifier);
+    element.setAttribute('data-identifier', type + '_' + identifier);
     return element;
   };
 
@@ -124,7 +124,7 @@
     var nodes = getNodes.call(this, content);
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.getAttribute("data-identifier") === "start_" + selectionId || node.getAttribute("data-highlight-id") === highlightId) {
+      if (node.getAttribute('data-identifier') === 'start_' + selectionId || node.getAttribute('data-highlight-id') === highlightId) {
         return node;
       }
     }
@@ -135,13 +135,13 @@
       , nodes = getNodes.call(this, content);
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.getAttribute("data-identifier") === "end_" + selectionId) endNode = node;
-      if (node.getAttribute("data-highlight-id") === highlightId) {
+      if (node.getAttribute('data-identifier') === 'end_' + selectionId) endNode = node;
+      if (node.getAttribute('data-highlight-id') === highlightId) {
         endNode = node;
       }
     }
 
-    if (endNode.parentNode.getAttribute("data-highlight-id") === highlightId) {
+    if (endNode.parentNode.getAttribute('data-highlight-id') === highlightId) {
       return endNode.parentNode;
     }
 
@@ -152,10 +152,10 @@
     var nodes = this.document_.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) {
+      if (node.getAttribute && node.getAttribute('data-highlight-id') === highlightId) {
         return true;
       }
-      if (node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) {
+      if (node.getAttribute && node.getAttribute('data-identifier') === 'start_' + selectionId) {
         break;
       }
     }
@@ -164,7 +164,7 @@
       if (node.nodeType === Node.TEXT_NODE) {
         return false;
       }
-      if (node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) {
+      if (node.getAttribute && node.getAttribute('data-highlight-id') === highlightId) {
         return true;
       }
     }
@@ -176,16 +176,16 @@
     var nodes = this.document_.createNodeIterator(content, NodeFilter.SHOW_ALL, null, false);
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.getAttribute && node.getAttribute("data-highlight-id") === highlightId) {
+      if (node.getAttribute && node.getAttribute('data-highlight-id') === highlightId) {
         break;
       }
     }
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.nodeType === Node.TEXT_NODE && (node.parentNode.getAttribute && node.parentNode.getAttribute("data-highlight-id") !== highlightId)) {
+      if (node.nodeType === Node.TEXT_NODE && (node.parentNode.getAttribute && node.parentNode.getAttribute('data-highlight-id') !== highlightId)) {
         return false;
       }
-      if (node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) {
+      if (node.getAttribute && node.getAttribute('data-identifier') === 'end_' + selectionId) {
         return true;
       }
     }
@@ -208,17 +208,17 @@
     };
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.getAttribute && node.getAttribute("data-identifier") === "start_" + selectionId) {
+      if (node.getAttribute && node.getAttribute('data-identifier') === 'start_' + selectionId) {
         insideCurrentSelection = true;
-        parentHighlightId = node.parentNode.getAttribute && node.parentNode.getAttribute("data-highlight-id");
+        parentHighlightId = node.parentNode.getAttribute && node.parentNode.getAttribute('data-highlight-id');
         if (parentHighlightId && !containsHighlight(parentHighlightId)) {
           highlights.push(parentHighlightId);
         }
       }
-      if (insideCurrentSelection && node.getAttribute && node.getAttribute("data-highlight-id") && !containsHighlight(node.getAttribute("data-highlight-id"))) {
-        highlights.push(node.getAttribute("data-highlight-id"));
+      if (insideCurrentSelection && node.getAttribute && node.getAttribute('data-highlight-id') && !containsHighlight(node.getAttribute('data-highlight-id'))) {
+        highlights.push(node.getAttribute('data-highlight-id'));
       }
-      if (node.getAttribute && node.getAttribute("data-identifier") === "end_" + selectionId) {
+      if (node.getAttribute && node.getAttribute('data-identifier') === 'end_' + selectionId) {
         break;
       }
     }
@@ -227,7 +227,7 @@
   };
 
   var filter = function(node) {
-    if (node.getAttribute("data-highlight-id") === null && node.getAttribute("data-identifier") === null) {
+    if (node.getAttribute('data-highlight-id') === null && node.getAttribute('data-identifier') === null) {
       return NodeFilter.FILTER_ACCEPT;
     }
 
@@ -239,7 +239,7 @@
   };
 
   var findNonHighlightAncestor = function(commonAncestor) {
-    while (commonAncestor.nodeName === "#text" || commonAncestor.getAttribute("data-highlight-id")) {
+    while (commonAncestor.nodeName === '#text' || commonAncestor.getAttribute('data-highlight-id')) {
       commonAncestor = commonAncestor.parentElement;
     }
 
@@ -258,7 +258,7 @@
     this.finder_ = options.finder || new Finder(this.document_);
     this.rangey_ = options.rangey || Rangey;
     this.marker_ = options.marker || new Marker(this.document_);
-    this.ancestorNodeSelector_ = options.ancestorNodeSelector || "#content";
+    this.ancestorNodeSelector_ = options.ancestorNodeSelector || '#content';
     this.ancestorNode_ = this.document_.querySelector(this.ancestorNodeSelector_);
   }
 
@@ -274,8 +274,8 @@
     nodes = this.document_.createNodeIterator(content, NodeFilter.SHOW_ELEMENT, null, false);
 
     while ((node = nodes.nextNode()) !== null) {
-      if (node.getAttribute("data-identifier") === "start_" + markerId) {
-        highlightAttributeId = node.parentNode.getAttribute("data-highlight-id");
+      if (node.getAttribute('data-identifier') === 'start_' + markerId) {
+        highlightAttributeId = node.parentNode.getAttribute('data-highlight-id');
         if (highlightAttributeId) {
           return highlightAttributeId;
         }
@@ -284,11 +284,11 @@
     }
 
     while ((node = nodes.nextNode()) !== null) {
-      highlightAttributeId = node.getAttribute("data-highlight-id");
+      highlightAttributeId = node.getAttribute('data-highlight-id');
       if (highlightAttributeId) {
         return highlightAttributeId;
       }
-      if (node.getAttribute("data-identifier") === "end_" + markerId) {
+      if (node.getAttribute('data-identifier') === 'end_' + markerId) {
         return;
       }
     }
@@ -303,13 +303,13 @@
     for (var i = startOffset - 1; i < endOffset; i++) {
       htmlElement += nodeContent[i];
       if (nodeContent[i] === '<') {
-        htmlElement += "/span><";
+        htmlElement += '/span><';
       } else if (nodeContent[i] === '>') {
         htmlElement += highlightTagWithId(highlight.guid, highlight.highlightClass);
       }
     }
 
-    htmlElement += "</span>";
+    htmlElement += '</span>';
 
     content.innerHTML = this.marker_.sanitize(htmlElement, highlight.guid) + nodeContent.substring(endOffset);
     this.removeMarkers(content);
@@ -360,7 +360,7 @@
     var range = this.window_.getSelection().getRangeAt(0)
       , parent = this.range_.startContainer.parentElement;
 
-    return parent.getAttribute("data-highlight-id");
+    return parent.getAttribute('data-highlight-id');
   };
 
   Hiliter.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
@@ -384,14 +384,14 @@
 
   Hiliter.prototype.getMergedHighlightClassNames = function(classNames, existingHighlightId) {
     var highlight = this.document_.querySelector('[data-highlight-id="' + existingHighlightId + '"]')
-      , classNameArray = classNames.split(" ")
+      , classNameArray = classNames.split(' ')
       , existingClassNames
 
     if (!highlight) {
       return classNames;
     }
 
-    existingClassNames = highlight.getAttribute("class").split(" ");
+    existingClassNames = highlight.getAttribute('class').split(' ');
 
     for (var i = 0; i < existingClassNames.length; i++) {
       if (classNameArray.indexOf(existingClassNames[i]) === -1) {
@@ -399,7 +399,7 @@
       }
     }
 
-    return classNameArray.join(" ");
+    return classNameArray.join(' ');
   };
 
   Hiliter.prototype.highlight = function(classNames, range, highlightId) {
@@ -503,7 +503,7 @@
   };
 
   var highlightTagWithId = function(id, className) {
-    return "<span data-highlight-id=\"" + id + "\" class=\"" + className + "\">";
+    return '<span data-highlight-id="' + id + '" class="' + className + '">';
   };
 
   Object.keys(Hiliter.prototype).forEach(function(k) {
