@@ -26,7 +26,7 @@ describe('Highlighter', function() {
         guid: 1,
         startOffset: 7,
         endOffset: 12,
-        highlightClass: 'highlight'
+        classNames: 'highlight'
       });
       expect(doc.innerHTML).to.equal('Hello <span data-highlight-id="1" class="highlight">World</span>. Some more text here.');
     });
@@ -38,7 +38,7 @@ describe('Highlighter', function() {
         guid:1,
         startOffset:2,
         endOffset:23,
-        highlightClass:'highlight'
+        classNames:'highlight'
       });
       expect(doc.innerHTML)
           .to.equal('<div>L<span data-highlight-id="1" class="highlight">orem ipsum dolor</span><br></div><span data-highlight-id="1" class="highlight"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.');
@@ -50,7 +50,7 @@ describe('Highlighter', function() {
         guid:1,
         startOffset:2,
         endOffset:23,
-        highlightClass:'highlight'
+        classNames:'highlight'
       });
       expect(doc.innerHTML)
           .to.equal('<div>L<span data-highlight-id="1" class="highlight">orem ipsum dolor</span></div><span data-highlight-id="1" class="highlight"> sit </span><div>amet, <span>consectetur <span>adipiscing elit.</span> Phasellus et </span>lectus quam,</div> in iaculis diam.');
