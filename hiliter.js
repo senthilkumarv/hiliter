@@ -300,14 +300,14 @@
     var nodeContent = content.innerHTML
       , startOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset)
       , endOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1)
-      , htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.classNames);
+      , htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.classNames, highlight.colorOverride);
 
     for (var i = startOffset - 1; i < endOffset; i++) {
       htmlElement += nodeContent[i];
       if (nodeContent[i] === '<') {
         htmlElement += '/span><';
       } else if (nodeContent[i] === '>') {
-        htmlElement += highlightTagWithId(highlight.guid, highlight.classNames);
+        htmlElement += highlightTagWithId(highlight.guid, highlight.classNames, highlight.colorOverride);
       }
     }
 
@@ -404,12 +404,14 @@
     return classNameArray.join(' ');
   };
 
-  Hiliter.prototype.highlight = function(classNames, range, highlightId) {
-    var existingHighlightId
+  Hiliter.prototype.highlight = function(options) {
+    var classNames = options.classNames || 'highlight'
+      , range = options.range || {}
+      , highlightId = options.highlightId || (new Date().getTime())
+      , colorOverride = options.colorOverride
+      , existingHighlightId
       , offset
       , highlightData
-
-    highlightId = (highlightId) ? highlightId : (new Date().getTime());
 
     this.wrapSelection(range, highlightId);
 
@@ -434,6 +436,7 @@
       startOffset: offset.startOffset,
       endOffset: offset.endOffset,
       classNames: classNames,
+      colorOverride: colorOverride,
       content: range.toString()
     };
 
@@ -504,8 +507,12 @@
     return numberOfHighlights;
   };
 
-  var highlightTagWithId = function(id, className) {
-    return '<span data-highlight-id="' + id + '" class="' + className + '">';
+  var highlightTagWithId = function(id, className, colorOverride) {
+    var dataAttr = ' data-highlight-id="' + id + '"'
+      , classAttr = ' class="' + className + '"'
+      , colorOverrideAttr = colorOverride ? (' style="background-color: ' + colorOverride + '"') : '';
+
+    return '<span ' + dataAttr + classAttr + colorOverrideAttr + '>';
   };
 
   Object.keys(Hiliter.prototype).forEach(function(k) {

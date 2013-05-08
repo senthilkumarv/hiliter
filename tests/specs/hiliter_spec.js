@@ -189,7 +189,9 @@ describe('Highlighter', function() {
         window: mockWindow
       });
 
-      highlightData = hiliter.highlight('highlight', {}, '555');
+      highlightData = hiliter.highlight({
+        highlightId: '555'
+      });
       expect(highlightData.guid).to.equal('111');
     });
 
@@ -222,7 +224,9 @@ describe('Highlighter', function() {
         window: mockWindow
       });
 
-      highlightData = hiliter.highlight('highlight', {}, '555');
+      highlightData = hiliter.highlight({
+        highlightId: '555'
+      });
       expect(highlightData.guid).to.equal('111');
       expect(highlightData.startOffset).to.equal(1);
       expect(highlightData.endOffset).to.equal(3);
@@ -233,7 +237,9 @@ describe('Highlighter', function() {
         marker: mockMarker,
         window: mockWindow
       });
-      var result = hiliter.highlight('', {}, '');
+      var result = hiliter.highlight({
+        classNames: ''
+      });
       expect(result).to.equal(null);
     });
 
@@ -244,7 +250,9 @@ describe('Highlighter', function() {
           endOffset: 2
         };
       };
-      var result = hiliter.highlight('', mockWindow, document, '');
+      var result = hiliter.highlight({
+        classNames: ''
+      });
       expect(result.startOffset).to.equal(1);
       expect(result.endOffset).to.equal(2);
     });
