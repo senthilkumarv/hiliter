@@ -1,3 +1,6 @@
 var handleSelection = function() {
-  var highlightData = Hiliter.highlight('highlight', window.getSelection().getRangeAt(0));
+  var highlightData = Hiliter.highlight({
+    range: window.getSelection().getRangeAt(0),
+    colorOverride: 'orange'
+  });
 };
