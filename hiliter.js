@@ -1,3 +1,15 @@
+(function(root) {
+  var GUID = root.GUID = { }
+
+  GUID.generate = function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8)
+
+      return v.toString(16)
+    })
+  }
+})(this);
+
 (function() {
   var root = this
 
@@ -260,6 +272,7 @@
     this.finder_ = options.finder || new Finder(this.document_);
     this.rangey_ = options.rangey || Rangey;
     this.marker_ = options.marker || new Marker(this.document_);
+    this.guid_ = options.guid || GUID;
     this.ancestorNodeSelector_ = options.ancestorNodeSelector || '#content';
     this.ancestorNode_ = this.document_.querySelector(this.ancestorNodeSelector_);
   }
@@ -366,7 +379,7 @@
   };
 
   Hiliter.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
-    var selectionId = new Date().getTime();
+    var selectionId = this.guid_.generate()
 
     wrapSelection(range, selectionId);
 
@@ -407,7 +420,7 @@
   Hiliter.prototype.highlight = function(options) {
     var classNames = options.classNames || 'highlight'
       , range = options.range || {}
-      , highlightId = options.highlightId || (new Date().getTime())
+      , highlightId = options.highlightId || this.guid_.generate()
       , colorOverride = options.colorOverride
       , existingHighlightId
       , offset
@@ -446,7 +459,7 @@
   };
 
   Hiliter.prototype.findExistingHighlight = function(range) {
-    var selectionId = new Date().getTime();
+    var selectionId = this.guid_.generate()
 
     this.wrapSelection(range, selectionId);
 
@@ -465,13 +478,15 @@
   };
 
   Hiliter.prototype.loadHighlights = function(highlights) {
+    var self = this
+
     highlights.forEach(function(highlight) {
-      this.addHighlight(this.ancestorNode_, highlight);
+      self.addHighlight(self.ancestorNode_, highlight);
     })
   };
 
   Hiliter.prototype.isHighlighted = function(range) {
-    var selectionId = new Date().getTime()
+    var selectionId = this.guid_.generate()
       , content = this.document_.querySelector(containerSelector)
       , existingHighlightId
       , isSelectionInHighlight;
@@ -494,7 +509,7 @@
   };
 
   Hiliter.prototype.highlightsInSelectionRange = function(containerSelector, range) {
-    var selectionId = new Date().getTime()
+    var selectionId = this.guid_.generate()
       , content = this.document_.querySelector(containerSelector)
       , numberOfHighlights
 
