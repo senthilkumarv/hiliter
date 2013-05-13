@@ -450,7 +450,7 @@
       endOffset: offset.endOffset,
       classNames: classNames,
       colorOverride: colorOverride,
-      content: range.toString()
+      selectedText: range.toString()
     };
 
     this.addHighlight(this.ancestorNode_, highlightData);
