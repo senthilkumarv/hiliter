@@ -487,7 +487,6 @@
 
   Hiliter.prototype.isHighlighted = function(range) {
     var selectionId = this.guid_.generate()
-      , content = this.document_.querySelector(containerSelector)
       , existingHighlightId
       , isSelectionInHighlight;
 
