@@ -1,5 +1,6 @@
-(function(root) {
-  var GUID = root.GUID = { }
+(function() {
+  var root = this
+    , GUID = root.GUID = { }
 
   GUID.generate = function() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -8,12 +9,11 @@
       return v.toString(16)
     })
   }
-})(this);
+}).call(this);
 
 (function() {
   var root = this
-
-  var Rangey = root.Rangey = { }
+    , Rangey = root.Rangey = { }
 
   Rangey.offsetFromContainer = function(content, identifier) {
     var startOffset = content.indexOf('<span data-identifier="start_' + identifier + '"')
@@ -64,7 +64,7 @@
 
     return index;
   };
-})(this);
+}).call(this);
 
 (function() {
   var root = this
@@ -98,7 +98,7 @@
     newRange.setEnd(element, endOffset);
     newRange.surroundContents(marker);
   };
-})(this);
+}).call(this);
 
 (function() {
   var root = this
@@ -259,7 +259,7 @@
 
     return commonAncestor;
   };
-})(this);
+}).call(this);
 
 (function() {
   var root = this
@@ -534,4 +534,4 @@
       return Hiliter.prototype[k].apply(new Hiliter(), arguments);
     };
   });
-})(this);
+}).call(this);
