@@ -463,7 +463,7 @@
 
     this.wrapSelection(range, selectionId);
 
-    return this.getExistingHighlight(this.document_.querySelector(this.ancestorNode_), selectionId);
+    return this.getExistingHighlight(this.ancestorNode_, selectionId);
   };
 
   Hiliter.prototype.removeNode = function(node) {
