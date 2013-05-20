@@ -313,14 +313,15 @@
     var nodeContent = content.innerHTML
       , startOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset)
       , endOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1)
-      , htmlElement = nodeContent.substring(0, startOffset - 1) + highlightTagWithId(highlight.guid, highlight.classNames, highlight.colorOverride);
+      , tagWithId = highlightTagWithId(highlight.guid, highlight.classNames, highlight.colorOverride)
+      , htmlElement = nodeContent.substring(0, startOffset - 1) + tagWithId;
 
     for (var i = startOffset - 1; i < endOffset; i++) {
       htmlElement += nodeContent[i];
       if (nodeContent[i] === '<') {
         htmlElement += '/span><';
       } else if (nodeContent[i] === '>') {
-        htmlElement += highlightTagWithId(highlight.guid, highlight.classNames, highlight.colorOverride);
+        htmlElement += tagWithId;
       }
     }
 
