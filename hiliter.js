@@ -508,9 +508,9 @@
     return isSelectionInHighlight;
   };
 
-  Hiliter.prototype.highlightsInSelectionRange = function(containerSelector, range) {
+  Hiliter.prototype.highlightsInSelectionRange = function(range) {
     var selectionId = this.guid_.generate()
-      , content = this.document_.querySelector(containerSelector)
+      , content = this.ancestorNode_
       , numberOfHighlights
 
     this.wrapSelection(range, selectionId);
