@@ -382,9 +382,9 @@
   Hiliter.prototype.getMergedRange = function(range, containerSelector, existingHighlightId) {
     var selectionId = this.guid_.generate()
 
-    wrapSelection(range, selectionId);
+    this.wrapSelection(range, selectionId);
 
-    return createMergedRange(this.document_.querySelector(containerSelector), existingHighlightId, selectionId, this.document_);
+    return this.createMergedRange(this.document_.querySelector(containerSelector), existingHighlightId, selectionId, this.document_);
   };
 
   Hiliter.prototype.createMergedRange = function(content, existingHighlightId, selectionId) {
