@@ -310,10 +310,11 @@
   };
 
   Hiliter.prototype.addHighlight = function(content, highlight) {
+    var highlightClassNames = highlight.classNames || "highlight";
     var nodeContent = content.innerHTML
       , startOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.startOffset)
       , endOffset = this.rangey_.convertTextOffsetToDocumentOffset(nodeContent, highlight.endOffset - 1)
-      , tagWithId = highlightTagWithId(highlight.guid, highlight.classNames, highlight.colorOverride)
+      , tagWithId = highlightTagWithId(highlight.guid, highlightClassNames, highlight.colorOverride)
       , htmlElement = nodeContent.substring(0, startOffset - 1) + tagWithId;
 
     for (var i = startOffset - 1; i < endOffset; i++) {
