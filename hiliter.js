@@ -437,7 +437,7 @@
       this.wrapSelection(range, existingHighlightId, window.document_);
       classNames = this.getMergedHighlightClassNames(classNames, existingHighlightId, window.document_);
       highlightId = existingHighlightId;
-      this.removeHighlight(this.ancestorNode_, existingHighlightId);
+      this.removeHighlight(existingHighlightId);
     }
 
     offset = this.rangey_.offsetFromContainer(this.ancestorNode_.innerHTML, highlightId);
