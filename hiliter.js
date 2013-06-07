@@ -427,6 +427,7 @@
       , existingHighlightId
       , offset
       , highlightData
+      , selectedText = range.toString()
 
     this.wrapSelection(range, highlightId);
 
@@ -437,6 +438,7 @@
       this.wrapSelection(range, existingHighlightId, window.document_);
       classNames = this.getMergedHighlightClassNames(classNames, existingHighlightId, window.document_);
       highlightId = existingHighlightId;
+      selectedText = range.toString();
       this.removeHighlight(existingHighlightId);
     }
 
@@ -452,7 +454,7 @@
       endOffset: offset.endOffset,
       classNames: classNames,
       colorOverride: colorOverride,
-      selectedText: range.toString()
+      selectedText: selectedText
     };
 
     this.addHighlight(this.ancestorNode_, highlightData);
