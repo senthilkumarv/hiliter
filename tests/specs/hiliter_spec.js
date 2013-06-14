@@ -20,6 +20,13 @@ describe('Highlighter', function() {
           .to.equal('<div>The quick brown fox <span data-highlight-id="1" class="highlight">jumps over the lazy</span> dog.</div>');
     });
 
+    it('should not remove highlight tags with empty space in them', function() {
+      var doc = '<div>The quick brown fox <span class="highlight" data-highlight-id="1"> </span><span data-highlight-id="1" class="highlight"></span><span data-highlight-id="1" class="highlight">jumps over the lazy</span> dog.</div>';
+      var sanitized_markups = new Marker(document).sanitize(doc, '1');
+      expect(sanitized_markups)
+          .to.equal('<div>The quick brown fox <span class="highlight" data-highlight-id="1"> </span><span data-highlight-id="1" class="highlight">jumps over the lazy</span> dog.</div>');
+    });
+
     it('should add the highlight tag for the give text range', function() {
       var doc = $('<div>Hello World. Some more text here.</div>')[0];
       hiliter.addHighlight(doc, {

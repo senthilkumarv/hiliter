@@ -82,7 +82,7 @@
   };
 
   Marker.prototype.sanitize = function(content, identifier) {
-    var regex = new RegExp('(<span[^>]+data-highlight-id\\s*=\\s*("|\')' + identifier + '\\2[^>]*>)(\\s*)(</span>)', 'g');
+    var regex = new RegExp('(<span[^>]+data-highlight-id\\s*=\\s*("|\')' + identifier + '\\2[^>]*></span>)', 'g');
     return content.replace(regex, '');
   };
 
