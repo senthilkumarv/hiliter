@@ -16,5 +16,5 @@ var highlightData = Hiliter.highlight({
 Persist the contents of "highlightData" variable and pass the same to "loadHighlights" method to recreate the highlight.
 
 ```javascript
-Hiliter.loadHighlights([highlightData]);highlightData
+Hiliter.loadHighlights([highlightData]);
 ```
